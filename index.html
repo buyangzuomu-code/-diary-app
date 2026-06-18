@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --bg: #0f0f0f;
@@ -180,7 +180,8 @@ const { useState, useEffect } = React;
 
 const SUPABASE_URL = 'https://rndewdcuvewyalxvfoqi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_pqSIdB7XK7-Dltr_AVBhLQ_yrOhwNSN';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const MENU_TYPES = ['ジョグ','ペース走','インターバル','閾値走','ロング走','レース','クロカン','補強・筋トレ','オフ','その他'];
 const MENU_ICONS = {
