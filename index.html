@@ -183,6 +183,7 @@
     .group-empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
 
     /* Misc */
+    .no-group-hint { padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--muted); line-height: 1.8; }
     .spinner { display: inline-block; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; color: var(--muted); padding: 50px 20px; font-size: 14px; line-height: 2; }
@@ -230,7 +231,7 @@ function generateCode() {
 }
 
 function defaultForm() {
-  return { entry_date: todayStr(), user_name: localStorage.getItem('diary_name') || '', menu_type: 'ジョグ', distance_km: '', time_min: '', condition_score: 3, motivation_score: 3, memo: '', is_public: true, community_id: null };
+  return { entry_date: todayStr(), user_name: localStorage.getItem('diary_name') || '', menu_type: 'ジョグ', distance_km: '', time_min: '', condition_score: 3, motivation_score: 3, memo: '', community_id: null };
 }
 
 async function callAI(prompt) {
@@ -368,34 +369,33 @@ function WriteTab({ form, setForm, saving, onSave, goal, setGoal, aiAuto, commun
       </div>
       <div className="form-group">
         <label>📢 共有先</label>
-        <div className="community-picker">
-          <div className={`cp-option ${form.is_public && !form.community_id ? 'selected' : ''}`}
-            onClick={() => { set('is_public', true); set('community_id', null); }}>
-            <div className="cp-radio" />
-            <div>
-              <div className="cp-label">🌐 全体公開</div>
-              <div className="cp-sub">チーム日誌に表示</div>
-            </div>
+        {communities.length === 0 ? (
+          <div className="no-group-hint">
+            グループに入っていないと共有できません。<br />
+            「👥 グループ」タブで作成 or 招待コードで参加してください。
           </div>
-          {communities.map(c => (
-            <div key={c.id} className={`cp-option ${form.community_id === c.id ? 'selected' : ''}`}
-              onClick={() => { set('community_id', c.id); set('is_public', true); }}>
+        ) : (
+          <div className="community-picker">
+            {communities.map(c => (
+              <div key={c.id} className={`cp-option ${form.community_id === c.id ? 'selected' : ''}`}
+                onClick={() => set('community_id', c.id)}>
+                <div className="cp-radio" />
+                <div>
+                  <div className="cp-label">👥 {c.name}</div>
+                  <div className="cp-sub">このグループに共有</div>
+                </div>
+              </div>
+            ))}
+            <div className={`cp-option ${form.community_id === null ? 'selected' : ''}`}
+              onClick={() => set('community_id', null)}>
               <div className="cp-radio" />
               <div>
-                <div className="cp-label">👥 {c.name}</div>
-                <div className="cp-sub">コード: {c.invite_code}</div>
+                <div className="cp-label">🔒 自分のみ</div>
+                <div className="cp-sub">グループには表示しない</div>
               </div>
             </div>
-          ))}
-          <div className={`cp-option ${!form.is_public ? 'selected' : ''}`}
-            onClick={() => { set('is_public', false); set('community_id', null); }}>
-            <div className="cp-radio" />
-            <div>
-              <div className="cp-label">🔒 自分のみ</div>
-              <div className="cp-sub">日誌には表示しない</div>
-            </div>
           </div>
-        </div>
+        )}
       </div>
       {aiAuto && <div className="ai-auto-notice">🤖 投稿後にAI分析が自動で実行されます</div>}
       <button className="btn-primary" disabled={!canSave || saving} onClick={onSave}>
@@ -504,22 +504,27 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
 }
 
 function FeedTab({ entries, loading, aiMode, goal, onDelete, communities, feedFilter, setFeedFilter }) {
+  if (communities.length === 0) {
+    return <div className="empty-state">グループに参加すると<br />チームの日誌が見られます<br /><br />👥 グループタブから参加・作成してください</div>;
+  }
   const filtered = feedFilter === 'all'
     ? entries
     : entries.filter(e => e.community_id === feedFilter);
 
   return (
     <div>
-      <div className="community-filter">
-        <button className={`cf-btn ${feedFilter === 'all' ? 'active' : ''}`} onClick={() => setFeedFilter('all')}>🌐 全体</button>
-        {communities.map(c => (
-          <button key={c.id} className={`cf-btn ${feedFilter === c.id ? 'active' : ''}`} onClick={() => setFeedFilter(c.id)}>👥 {c.name}</button>
-        ))}
-      </div>
+      {communities.length > 1 && (
+        <div className="community-filter">
+          <button className={`cf-btn ${feedFilter === 'all' ? 'active' : ''}`} onClick={() => setFeedFilter('all')}>すべて</button>
+          {communities.map(c => (
+            <button key={c.id} className={`cf-btn ${feedFilter === c.id ? 'active' : ''}`} onClick={() => setFeedFilter(c.id)}>👥 {c.name}</button>
+          ))}
+        </div>
+      )}
       {loading ? (
         <div className="empty-state">⏳ 読み込み中...</div>
       ) : !filtered.length ? (
-        <div className="empty-state">日誌がありません</div>
+        <div className="empty-state">まだ日誌がありません<br />最初の一件を投稿してみよう！</div>
       ) : (
         <div className="content">
           <div className="section-hint">クリックで展開 → AI分析・監督コメント</div>
@@ -630,7 +635,7 @@ function GroupTab({ communities, setCommunities }) {
       setCommunities(updated); saveMyCommunities(updated);
       setCreateName('');
       showMsg(`作成しました！招待コード: ${code}`);
-    } else { showMsg('作成に失敗しました'); }
+    } else { showMsg('作成失敗: ' + (error?.message || 'テーブルが未作成の可能性があります')); }
     setCreating(false);
   }
 
@@ -719,7 +724,10 @@ function App() {
 
   async function loadEntries() {
     setFeedLoading(true);
-    const { data } = await sb.from('diary_entries').select('*').eq('is_public', true)
+    const ids = communities.map(c => c.id);
+    if (ids.length === 0) { setEntries([]); setFeedLoading(false); return; }
+    const { data } = await sb.from('diary_entries').select('*')
+      .in('community_id', ids)
       .order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(60);
     setEntries(data || []);
     setFeedLoading(false);
@@ -727,9 +735,11 @@ function App() {
 
   async function loadCalEntries(year, month) {
     setCalLoading(true);
+    const ids = communities.map(c => c.id);
+    if (ids.length === 0) { setCalEntries([]); setCalLoading(false); return; }
     const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
     const to = `${year}-${String(month+1).padStart(2,'0')}-${String(new Date(year, month+1, 0).getDate()).padStart(2,'0')}`;
-    const { data } = await sb.from('diary_entries').select('*').eq('is_public', true).gte('entry_date', from).lte('entry_date', to);
+    const { data } = await sb.from('diary_entries').select('*').in('community_id', ids).gte('entry_date', from).lte('entry_date', to);
     setCalEntries(data || []);
     setCalLoading(false);
   }
@@ -741,7 +751,7 @@ function App() {
       distance_km: form.distance_km ? parseFloat(form.distance_km) : null,
       time_min: form.time_min ? parseFloat(form.time_min) : null,
       condition_score: form.condition_score, motivation_score: form.motivation_score,
-      memo: form.memo.trim(), is_public: form.is_public, community_id: form.community_id || null,
+      memo: form.memo.trim(), community_id: form.community_id || null,
     };
     const { data, error } = await sb.from('diary_entries').insert([payload]).select();
     if (!error) {
