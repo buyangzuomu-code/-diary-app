@@ -10,184 +10,177 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
-      --accent: #f97316; --text: #f0f0f0; --muted: #777;
-      --green: #4ade80; --yellow: #fbbf24;
-      --red-dark: #7f1d1d; --red-light: #fca5a5;
-      --blue-dark: #1e3a5f; --blue-light: #93c5fd;
+      --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#242424; --border:#2e2e2e;
+      --accent:#f97316; --text:#f0f0f0; --muted:#777;
+      --green:#4ade80; --yellow:#fbbf24;
+      --red-dark:#7f1d1d; --red-light:#fca5a5;
+      --blue-dark:#1e3a5f; --blue-light:#93c5fd;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system,'Helvetica Neue','Hiragino Sans',sans-serif; min-height: 100vh; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,'Helvetica Neue','Hiragino Sans',sans-serif;min-height:100vh}
 
-    /* Header */
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; gap: 10px; }
-    .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; color: var(--accent); flex-shrink: 0; }
-    .logo span { color: var(--text); font-weight: 300; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
-    .ai-auto-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 11px; font-weight: 700; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.2s; }
-    .ai-auto-btn.on { background: rgba(74,222,128,.1); border-color: #4ade80; color: #4ade80; }
-    .mode-toggle { display: flex; background: var(--surface2); border-radius: 20px; padding: 3px; gap: 2px; }
-    .mode-btn { padding: 5px 12px; border-radius: 17px; border: none; cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.2s; background: transparent; color: var(--muted); }
-    .mode-btn.active-sparta { background: var(--red-dark); color: var(--red-light); }
-    .mode-btn.active-gentle { background: var(--blue-dark); color: var(--blue-light); }
+    .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px}
+    .logo{font-size:18px;font-weight:800;letter-spacing:-.5px;color:var(--accent);flex-shrink:0}
+    .logo span{color:var(--text);font-weight:300}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .ai-auto-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+    .ai-auto-btn.on{background:rgba(74,222,128,.1);border-color:#4ade80;color:#4ade80}
+    .mode-toggle{display:flex;background:var(--surface2);border-radius:20px;padding:3px;gap:2px}
+    .mode-btn{padding:5px 11px;border-radius:17px;border:none;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;background:transparent;color:var(--muted)}
+    .mode-btn.active-sparta{background:var(--red-dark);color:var(--red-light)}
+    .mode-btn.active-gentle{background:var(--blue-dark);color:var(--blue-light)}
 
-    /* Tabs */
-    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
-    .tab-btn { flex: 1; padding: 12px 4px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+    .tab-btn{flex:1;padding:12px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid transparent;transition:all .2s}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-    /* Community filter */
-    .community-filter { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); overflow-x: auto; }
-    .cf-btn { padding: 4px 12px; border-radius: 14px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--muted); white-space: nowrap; transition: all 0.2s; }
-    .cf-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .community-filter{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+    .cf-btn{padding:4px 12px;border-radius:14px;border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);white-space:nowrap;transition:all .2s}
+    .cf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-    /* Content */
-    .content { max-width: 680px; margin: 0 auto; padding: 16px; }
+    .content{max-width:680px;margin:0 auto;padding:16px}
 
-    /* Form */
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    input, select, textarea { width: 100%; padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-    textarea { resize: vertical; min-height: 100px; font-family: inherit; line-height: 1.6; }
-    select option { background: var(--surface2); }
-    input[type="number"] { -moz-appearance: textfield; }
-    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .sub-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .menu-desc { margin-top: 7px; font-size: 12px; color: var(--muted); line-height: 1.6; padding: 8px 11px; background: var(--surface); border-radius: 6px; border-left: 2px solid var(--accent); }
+    /* Form elements */
+    .form-group{margin-bottom:14px}
+    label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    input,select,textarea{width:100%;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    textarea{resize:vertical;min-height:90px;font-family:inherit;line-height:1.6}
+    select option{background:var(--surface2)}
+    input[type="number"]{-moz-appearance:textfield}
+    input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
+    .sub-hint{font-size:11px;color:var(--muted);margin-top:5px}
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .menu-desc{margin-top:7px;font-size:12px;color:var(--muted);line-height:1.6;padding:7px 11px;background:var(--surface);border-radius:6px;border-left:2px solid var(--accent)}
+    .no-group-hint{padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);line-height:1.8}
 
     /* Stars */
-    .stars { display: flex; gap: 7px; }
-    .star { width: 36px; height: 36px; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.15s; color: var(--muted); user-select: none; }
-    .star.cond { border-color: var(--green); background: rgba(74,222,128,.12); color: var(--green); }
-    .star.motiv { border-color: var(--yellow); background: rgba(251,191,36,.12); color: var(--yellow); }
+    .stars{display:flex;gap:7px}
+    .star{width:34px;height:34px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;color:var(--muted);user-select:none}
+    .star.cond{border-color:var(--green);background:rgba(74,222,128,.12);color:var(--green)}
+    .star.motiv{border-color:var(--yellow);background:rgba(251,191,36,.12);color:var(--yellow)}
 
     /* Community picker */
-    .community-picker { display: flex; flex-direction: column; gap: 6px; }
-    .cp-option { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
-    .cp-option:hover { border-color: #444; }
-    .cp-option.selected { border-color: var(--accent); background: rgba(249,115,22,.07); }
-    .cp-radio { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); flex-shrink: 0; transition: all 0.15s; }
-    .cp-option.selected .cp-radio { background: var(--accent); border-color: var(--accent); }
-    .cp-label { font-size: 13px; font-weight: 600; }
-    .cp-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .community-picker{display:flex;flex-direction:column;gap:6px}
+    .cp-option{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+    .cp-option:hover{border-color:#444}
+    .cp-option.selected{border-color:var(--accent);background:rgba(249,115,22,.07)}
+    .cp-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;transition:all .15s}
+    .cp-option.selected .cp-radio{background:var(--accent);border-color:var(--accent)}
+    .cp-label{font-size:13px;font-weight:600}
+    .cp-sub{font-size:11px;color:var(--muted);margin-top:1px}
 
-    /* Share toggle */
-    .share-toggle { display: flex; align-items: center; gap: 13px; cursor: pointer; padding: 11px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
-    .toggle-track { width: 42px; height: 23px; background: #333; border-radius: 12px; position: relative; flex-shrink: 0; transition: background 0.2s; }
-    .toggle-track.on { background: var(--accent); }
-    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
-    .toggle-track.on .toggle-thumb { transform: translateX(19px); }
-    .toggle-label { font-size: 13px; font-weight: 600; }
+    .ai-auto-notice{padding:9px 13px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;font-size:12px;color:#4ade80;margin-bottom:12px;text-align:center}
+    .btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+    .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+    .btn-primary:hover:not(:disabled){opacity:.88}
 
-    /* AI auto notice */
-    .ai-auto-notice { padding: 9px 13px; background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.2); border-radius: 8px; font-size: 12px; color: #4ade80; margin-bottom: 12px; text-align: center; }
+    /* Entry cards */
+    .entry-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+    .entry-header{padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s}
+    .entry-header:hover{background:var(--surface2)}
+    .avatar{width:40px;height:40px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;color:#fff}
+    .entry-meta{flex:1;min-width:0}
+    .entry-name{font-weight:700;font-size:14px}
+    .entry-date-row{font-size:11px;color:var(--muted);margin-top:1px}
+    .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+    .badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+    .badge-menu{background:#1e293b;color:var(--blue-light)}
+    .badge-dist{background:rgba(74,222,128,.1);color:var(--green)}
+    .badge-time{background:rgba(251,191,36,.1);color:var(--yellow)}
+    .badge-ai{background:rgba(74,222,128,.1);color:#4ade80}
+    .badge-coach{background:rgba(96,165,250,.1);color:#93c5fd}
+    .badge-group{background:rgba(249,115,22,.1);color:var(--accent)}
+    .entry-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .btn-delete{padding:4px 7px;background:transparent;border:none;color:#555;cursor:pointer;font-size:14px;border-radius:4px}
+    .btn-delete:hover:not(:disabled){color:#ef4444}
+    .chevron{color:var(--muted);font-size:11px}
+    .entry-body{border-top:1px solid var(--border);padding:13px 15px}
+    .score-row{display:flex;gap:18px;margin-bottom:10px;font-size:12px;color:var(--muted)}
+    .memo-text{font-size:14px;color:#ccc;line-height:1.75;white-space:pre-wrap;margin-bottom:13px}
 
-    /* Buttons */
-    .btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
-
-    /* Feed entry */
-    .entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-    .entry-header { padding: 13px 15px; display: flex; align-items: center; gap: 11px; cursor: pointer; transition: background 0.15s; }
-    .entry-header:hover { background: var(--surface2); }
-    .avatar { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; color: #fff; }
-    .entry-meta { flex: 1; min-width: 0; }
-    .entry-name { font-weight: 700; font-size: 14px; }
-    .entry-date-row { font-size: 11px; color: var(--muted); margin-top: 1px; }
-    .badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
-    .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-    .badge-menu { background: #1e293b; color: var(--blue-light); }
-    .badge-dist { background: rgba(74,222,128,.1); color: var(--green); }
-    .badge-time { background: rgba(251,191,36,.1); color: var(--yellow); }
-    .badge-ai { background: rgba(74,222,128,.1); color: #4ade80; }
-    .badge-coach { background: rgba(96,165,250,.1); color: #93c5fd; }
-    .badge-group { background: rgba(249,115,22,.1); color: var(--accent); }
-    .entry-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .btn-delete { padding: 4px 7px; background: transparent; border: none; color: #555; cursor: pointer; font-size: 14px; border-radius: 4px; }
-    .btn-delete:hover:not(:disabled) { color: #ef4444; }
-    .chevron { color: var(--muted); font-size: 11px; }
-
-    /* Entry body */
-    .entry-body { border-top: 1px solid var(--border); padding: 13px 15px; }
-    .score-row { display: flex; gap: 18px; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
-    .memo-text { font-size: 14px; color: #ccc; line-height: 1.75; white-space: pre-wrap; margin-bottom: 13px; }
-
-    /* AI section */
-    .ai-section { border-top: 1px solid var(--border); padding-top: 13px; }
-    .btn-ai { padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.18s; }
-    .btn-ai.sparta { background: var(--red-dark); color: var(--red-light); }
-    .btn-ai.sparta:hover:not(:disabled) { background: #991b1b; }
-    .btn-ai.gentle { background: var(--blue-dark); color: var(--blue-light); }
-    .btn-ai.gentle:hover:not(:disabled) { background: #1e40af; }
-    .btn-ai:disabled { opacity: 0.45; cursor: not-allowed; }
-    .ai-result { margin-top: 11px; padding: 13px 15px; border-radius: 8px; font-size: 13px; line-height: 1.85; white-space: pre-wrap; }
-    .ai-result.sparta { background: #180808; border: 1px solid var(--red-dark); color: #fecaca; }
-    .ai-result.gentle { background: #08101a; border: 1px solid var(--blue-dark); color: #bfdbfe; }
-    .ai-result-meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    /* AI */
+    .ai-section{border-top:1px solid var(--border);padding-top:13px}
+    .btn-ai{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .18s}
+    .btn-ai.sparta{background:var(--red-dark);color:var(--red-light)}
+    .btn-ai.sparta:hover:not(:disabled){background:#991b1b}
+    .btn-ai.gentle{background:var(--blue-dark);color:var(--blue-light)}
+    .btn-ai.gentle:hover:not(:disabled){background:#1e40af}
+    .btn-ai:disabled{opacity:.45;cursor:not-allowed}
+    .ai-result{margin-top:11px;padding:13px 15px;border-radius:8px;font-size:13px;line-height:1.85;white-space:pre-wrap}
+    .ai-result.sparta{background:#180808;border:1px solid var(--red-dark);color:#fecaca}
+    .ai-result.gentle{background:#08101a;border:1px solid var(--blue-dark);color:#bfdbfe}
+    .ai-result-meta{font-size:11px;color:var(--muted);margin-top:5px}
 
     /* Coach */
-    .coach-section { margin-top: 13px; border-top: 1px solid var(--border); padding-top: 13px; }
-    .coach-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .coach-existing { padding: 9px 11px; background: rgba(96,165,250,.07); border: 1px solid rgba(96,165,250,.2); border-radius: 6px; font-size: 13px; color: #93c5fd; line-height: 1.7; margin-bottom: 8px; white-space: pre-wrap; }
-    .coach-input { width: 100%; padding: 9px 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; resize: vertical; min-height: 65px; font-family: inherit; outline: none; }
-    .coach-input:focus { border-color: #60a5fa; }
-    .btn-coach-save { margin-top: 7px; padding: 6px 15px; background: var(--blue-dark); color: var(--blue-light); border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
-    .btn-coach-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .coach-section{margin-top:13px;border-top:1px solid var(--border);padding-top:13px}
+    .coach-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .coach-existing{padding:9px 11px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:6px;font-size:13px;color:#93c5fd;line-height:1.7;margin-bottom:8px;white-space:pre-wrap}
+    .coach-input{width:100%;padding:9px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;resize:vertical;min-height:65px;font-family:inherit;outline:none}
+    .coach-input:focus{border-color:#60a5fa}
+    .btn-coach-save{margin-top:7px;padding:6px 15px;background:var(--blue-dark);color:var(--blue-light);border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-coach-save:disabled{opacity:.5;cursor:not-allowed}
 
     /* Calendar */
-    .monthly-stats-bar { display: flex; gap: 20px; justify-content: center; padding: 16px; background: var(--surface2); border-radius: 10px; margin-bottom: 14px; }
-    .monthly-stat { text-align: center; }
-    .stat-val { font-size: 26px; font-weight: 800; color: var(--accent); }
-    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .cal-nav-btn { padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 14px; }
-    .cal-title { font-size: 15px; font-weight: 700; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-    .cal-header { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); padding: 5px 0; }
-    .cal-header.sun { color: #f87171; } .cal-header.sat { color: #60a5fa; }
-    .cal-cell { min-height: 54px; padding: 4px; border-radius: 6px; background: var(--surface2); }
-    .cal-cell.has-entry { background: var(--surface); border: 1px solid var(--border); cursor: pointer; }
-    .cal-cell.has-entry:hover { border-color: #555; }
-    .cal-cell.selected { border: 1px solid var(--accent) !important; background: rgba(249,115,22,.08); }
-    .cal-cell.today .cal-day { color: var(--accent); font-weight: 800; }
-    .cal-cell.empty { background: transparent; }
-    .cal-day { font-size: 12px; font-weight: 600; }
-    .cal-dots { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 3px; }
-    .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .cal-km { font-size: 9px; color: var(--muted); margin-top: 2px; }
-    .cal-detail { margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-    .cal-detail-date { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
-    .cal-detail-entry { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; }
-    .cal-detail-name { font-weight: 600; }
-    .cal-detail-menu { color: var(--muted); }
-    .cal-detail-km { color: var(--green); font-size: 12px; margin-left: auto; }
+    .monthly-stats-bar{display:flex;gap:20px;justify-content:center;padding:14px;background:var(--surface2);border-radius:10px;margin-bottom:12px}
+    .monthly-stat{text-align:center}
+    .stat-val{font-size:24px;font-weight:800;color:var(--accent)}
+    .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .cal-nav-btn{padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:14px}
+    .cal-title{font-size:15px;font-weight:700}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+    .cal-header{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:5px 0}
+    .cal-header.sun{color:#f87171} .cal-header.sat{color:#60a5fa}
+    .cal-cell{min-height:52px;padding:4px;border-radius:6px;background:var(--surface2)}
+    .cal-cell.has-entry{background:var(--surface);border:1px solid var(--border);cursor:pointer}
+    .cal-cell.has-entry:hover{border-color:#555}
+    .cal-cell.selected{border:1px solid var(--accent)!important;background:rgba(249,115,22,.08)}
+    .cal-cell.today .cal-day{color:var(--accent);font-weight:800}
+    .cal-cell.empty{background:transparent}
+    .cal-cell.clickable{cursor:pointer}
+    .cal-cell.clickable:hover{border:1px solid #444}
+    .cal-day{font-size:12px;font-weight:600}
+    .cal-dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:3px}
+    .cal-dot{width:6px;height:6px;border-radius:50%}
+    .cal-km{font-size:9px;color:var(--muted);margin-top:2px}
+
+    /* Date panel (write + existing entries) */
+    .date-panel{margin-top:14px;background:var(--surface);border:1px solid var(--accent);border-radius:12px;overflow:hidden}
+    .date-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--border)}
+    .date-panel-title{font-size:15px;font-weight:700;color:var(--accent)}
+    .date-panel-close{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px}
+    .date-panel-body{padding:14px 15px}
+    .day-existing{margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px}
+    .day-existing-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .day-mini-entry{display:flex;gap:8px;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:6px;font-size:13px}
+    .day-mini-name{font-weight:700}
+    .day-mini-menu{color:var(--muted)}
+    .day-mini-km{color:var(--green);margin-left:auto;font-size:12px}
+    .date-select-hint{text-align:center;color:var(--muted);font-size:13px;padding:20px;margin-top:10px}
 
     /* Group tab */
-    .group-section { margin-bottom: 22px; }
-    .group-section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .group-name { font-size: 14px; font-weight: 700; }
-    .group-code { font-size: 12px; color: var(--muted); margin-top: 2px; font-family: monospace; letter-spacing: 1px; }
-    .group-btns { display: flex; gap: 6px; flex-shrink: 0; }
-    .btn-copy { padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; font-size: 11px; color: var(--muted); cursor: pointer; }
-    .btn-leave { padding: 4px 10px; background: transparent; border: 1px solid #3a3a3a; border-radius: 5px; font-size: 11px; color: #666; cursor: pointer; }
-    .btn-leave:hover { color: #ef4444; border-color: #ef4444; }
-    .input-row { display: flex; gap: 8px; }
-    .input-row input { flex: 1; }
-    .btn-action { padding: 10px 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
-    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-action:hover:not(:disabled) { opacity: 0.88; }
-    .group-empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
+    .group-section{margin-bottom:22px}
+    .group-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+    .group-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .group-name{font-size:14px;font-weight:700}
+    .group-code{font-size:12px;color:var(--muted);margin-top:2px;font-family:monospace;letter-spacing:1px}
+    .group-btns{display:flex;gap:6px;flex-shrink:0}
+    .btn-copy{padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer}
+    .btn-leave{padding:4px 10px;background:transparent;border:1px solid #3a3a3a;border-radius:5px;font-size:11px;color:#666;cursor:pointer}
+    .btn-leave:hover{color:#ef4444;border-color:#ef4444}
+    .input-row{display:flex;gap:8px}
+    .input-row input{flex:1}
+    .btn-action{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+    .btn-action:disabled{opacity:.5;cursor:not-allowed}
+    .btn-action:hover:not(:disabled){opacity:.88}
+    .group-empty{color:var(--muted);font-size:13px;padding:12px 0}
+    .msg-box{padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;font-size:13px;color:#4ade80;margin-bottom:14px}
 
-    /* Misc */
-    .no-group-hint { padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--muted); line-height: 1.8; }
-    .spinner { display: inline-block; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-state { text-align: center; color: var(--muted); padding: 50px 20px; font-size: 14px; line-height: 2; }
-    .section-hint { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0 4px; }
+    .spinner{display:inline-block;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-state{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;line-height:2}
+    .section-hint{font-size:12px;color:var(--muted);text-align:center;padding:8px 0 4px}
   </style>
 </head>
 <body>
@@ -219,38 +212,31 @@ const MENU_COLOR = {'ジョグ':'#60a5fa','ペース走':'#f97316','インター
 const DAY_NAMES = ['日','月','火','水','木','金','土'];
 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
-
-function getMyCommunities() {
-  try { return JSON.parse(localStorage.getItem('diary_communities') || '[]'); } catch { return []; }
-}
+function getMyCommunities() { try { return JSON.parse(localStorage.getItem('diary_communities') || '[]'); } catch { return []; } }
 function saveMyCommunities(cs) { localStorage.setItem('diary_communities', JSON.stringify(cs)); }
-
 function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
 }
-
 function defaultForm() {
-  return { entry_date: todayStr(), user_name: localStorage.getItem('diary_name') || '', menu_type: 'ジョグ', distance_km: '', time_min: '', condition_score: 3, motivation_score: 3, memo: '', community_id: null };
+  return { entry_date: todayStr(), user_name: localStorage.getItem('diary_name')||'', menu_type:'ジョグ', distance_km:'', time_min:'', condition_score:3, motivation_score:3, memo:'', community_id:null };
 }
 
 async function callAI(prompt) {
   const res = await fetch('/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gemini-2.5-flash', max_tokens: 900, messages: [{ role: 'user', content: prompt }] }),
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model:'gemini-2.5-flash', max_tokens:900, messages:[{role:'user',content:prompt}] }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+  return data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
 }
 
 function buildPrompt(entry, mode, goal) {
   const dist = entry.distance_km ? `${entry.distance_km}km` : '未記録';
   const time = entry.time_min ? `${entry.time_min}分` : '未記録';
   const pace = (entry.distance_km && entry.time_min)
-    ? (() => { const s = Math.round(entry.time_min / entry.distance_km * 60); return `${Math.floor(s/60)}'${String(s%60).padStart(2,'0')}"／km`; })()
-    : null;
+    ? (() => { const s=Math.round(entry.time_min/entry.distance_km*60); return `${Math.floor(s/60)}'${String(s%60).padStart(2,'0')}"／km`; })() : null;
   const cond = entry.condition_score || 3;
   const motiv = entry.motivation_score || 3;
   const memo = entry.memo || '（なし）';
@@ -270,18 +256,13 @@ ${goalLine}
 本人コメント: 「${memo}」
 
 以下を専門的・具体的に厳しく回答：
-【練習の質評価】
-VO2max強度・LTペース・運動強度ゾーンの観点で数値根拠を交えて評価
-【目標との整合性】
-目標達成に向け今日の練習の適切さ、不足点・過剰点を明確に指摘
-【問題点と改善指示】
-ペース配分・距離・本数・レスト等について具体的数値を挙げて指摘
-【次回の練習処方】
-目標に向けた具体的な練習内容（種別・距離・ペース・本数等）を処方
-【一言】
-甘えを許さない、魂に響く激励`;
+【練習の質評価】VO2max強度・LTペース・運動強度ゾーンの観点で数値根拠を交えて評価
+【目標との整合性】目標達成に向け今日の練習の適切さ、不足点・過剰点を明確に指摘
+【問題点と改善指示】ペース配分・距離・本数・レスト等について具体的数値を挙げて指摘
+【次回の練習処方】目標に向けた具体的な練習内容（種別・距離・ペース・本数等）を処方
+【一言】甘えを許さない、魂に響く激励`;
   } else {
-    return `あなたはスポーツ科学と選手心理に精通した、選手に寄り添う優しいランニングコーチです。科学的根拠を大切にしながら、選手が前向きに次の練習に臨めるようサポートしてください。
+    return `あなたはスポーツ科学と選手心理に精通した、選手に寄り添う優しいランニングコーチです。科学的根拠を大切にしながら選手が前向きに練習に臨めるようサポートしてください。
 
 【選手データ】
 名前: ${entry.user_name}
@@ -293,16 +274,11 @@ ${goalLine}
 本人コメント: 「${memo}」
 
 以下を温かく・専門的に回答：
-【今日の練習の振り返り】
-体調・強度・種別を踏まえ今日の取り組みを肯定的に総括
-【目標に向かっている点】
-今日の練習が目標達成にどう貢献しているかを具体的に
-【体のケアとリカバリー】
-今日の練習量・強度に応じた回復アドバイス（栄養・睡眠・ストレッチ等）
-【次回のアドバイス】
-無理なく続けられる、目標に向けた具体的な練習提案
-【応援メッセージ】
-前向きになれる温かい一言`;
+【今日の練習の振り返り】体調・強度・種別を踏まえ今日の取り組みを肯定的に総括
+【目標に向かっている点】今日の練習が目標達成にどう貢献しているかを具体的に
+【体のケアとリカバリー】今日の練習量・強度に応じた回復アドバイス（栄養・睡眠・ストレッチ等）
+【次回のアドバイス】無理なく続けられる、目標に向けた具体的な練習提案
+【応援メッセージ】前向きになれる温かい一言`;
   }
 }
 
@@ -316,27 +292,20 @@ function Stars({ value, onChange, type }) {
   );
 }
 
-function WriteTab({ form, setForm, saving, onSave, goal, setGoal, aiAuto, communities }) {
+function WriteForm({ form, setForm, saving, onSave, goal, setGoal, aiAuto, communities }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const canSave = form.user_name.trim() && form.memo.trim();
-
   return (
-    <div className="content">
-      <div className="form-group">
-        <label>日付</label>
-        <input type="date" value={form.entry_date} onChange={e => set('entry_date', e.target.value)} />
-      </div>
+    <div>
       <div className="form-group">
         <label>名前</label>
         <input type="text" value={form.user_name} placeholder="例：佐藤 大地"
           onChange={e => { set('user_name', e.target.value); localStorage.setItem('diary_name', e.target.value); }} />
-        <div className="sub-hint">次回から自動入力されます</div>
       </div>
       <div className="form-group">
         <label>🎯 目標（任意）</label>
-        <input type="text" value={goal} placeholder="例：10000m 27:30切り　箱根3区区間賞"
+        <input type="text" value={goal} placeholder="例：10000m 27:30切り"
           onChange={e => { setGoal(e.target.value); localStorage.setItem('diary_goal', e.target.value); }} />
-        <div className="sub-hint">AI分析で目標との整合性も評価します</div>
       </div>
       <div className="form-group">
         <label>練習種目</label>
@@ -365,34 +334,24 @@ function WriteTab({ form, setForm, saving, onSave, goal, setGoal, aiAuto, commun
       </div>
       <div className="form-group">
         <label>練習メモ</label>
-        <textarea value={form.memo} rows={5} placeholder={`今日の練習を記録してください。\nペース・本数・体の感覚・気づきなど。`} onChange={e => set('memo', e.target.value)} />
+        <textarea value={form.memo} rows={4} placeholder={`今日の練習を記録。\nペース・体の感覚・気づきなど。`}
+          onChange={e => set('memo', e.target.value)} />
       </div>
       <div className="form-group">
         <label>📢 共有先</label>
         {communities.length === 0 ? (
-          <div className="no-group-hint">
-            グループに入っていないと共有できません。<br />
-            「👥 グループ」タブで作成 or 招待コードで参加してください。
-          </div>
+          <div className="no-group-hint">グループ未参加。「👥 グループ」タブで参加・作成するとチームと共有できます。</div>
         ) : (
           <div className="community-picker">
             {communities.map(c => (
-              <div key={c.id} className={`cp-option ${form.community_id === c.id ? 'selected' : ''}`}
-                onClick={() => set('community_id', c.id)}>
+              <div key={c.id} className={`cp-option ${form.community_id === c.id ? 'selected' : ''}`} onClick={() => set('community_id', c.id)}>
                 <div className="cp-radio" />
-                <div>
-                  <div className="cp-label">👥 {c.name}</div>
-                  <div className="cp-sub">このグループに共有</div>
-                </div>
+                <div><div className="cp-label">👥 {c.name}</div><div className="cp-sub">このグループに共有</div></div>
               </div>
             ))}
-            <div className={`cp-option ${form.community_id === null ? 'selected' : ''}`}
-              onClick={() => set('community_id', null)}>
+            <div className={`cp-option ${form.community_id === null ? 'selected' : ''}`} onClick={() => set('community_id', null)}>
               <div className="cp-radio" />
-              <div>
-                <div className="cp-label">🔒 自分のみ</div>
-                <div className="cp-sub">グループには表示しない</div>
-              </div>
+              <div><div className="cp-label">🔒 自分のみ</div><div className="cp-sub">グループには表示しない</div></div>
             </div>
           </div>
         )}
@@ -418,26 +377,26 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
   const initials = entry.user_name ? entry.user_name.charAt(0) : '?';
   const dist = entry.distance_km ? `${entry.distance_km}km` : null;
   const time = entry.time_min ? `${entry.time_min}分` : null;
-  const condStars = '★'.repeat(entry.condition_score || 0) + '☆'.repeat(5 - (entry.condition_score || 0));
-  const motivStars = '★'.repeat(entry.motivation_score || 0) + '☆'.repeat(5 - (entry.motivation_score || 0));
+  const condStars = '★'.repeat(entry.condition_score||0)+'☆'.repeat(5-(entry.condition_score||0));
+  const motivStars = '★'.repeat(entry.motivation_score||0)+'☆'.repeat(5-(entry.motivation_score||0));
   const dotColor = MENU_COLOR[entry.menu_type] || 'var(--accent)';
-  const groupName = entry.community_id ? (communities.find(c => c.id === entry.community_id) || {}).name : null;
+  const groupName = entry.community_id ? (communities.find(c=>c.id===entry.community_id)||{}).name : null;
 
   async function analyze() {
     setAnalyzing(true); setResult('');
     try {
       const text = await callAI(buildPrompt(entry, aiMode, goal));
       setResult(text); setResultMode(aiMode);
-      await sb.from('diary_entries').update({ ai_feedback: text, ai_mode: aiMode }).eq('id', entry.id);
-    } catch(e) { setResult('エラー: ' + e.message); setResultMode(aiMode); }
+      await sb.from('diary_entries').update({ai_feedback:text, ai_mode:aiMode}).eq('id', entry.id);
+    } catch(e) { setResult('エラー: '+e.message); setResultMode(aiMode); }
     setAnalyzing(false);
   }
 
   async function saveCoach() {
     setCoachSaving(true);
-    await sb.from('diary_entries').update({ coach_comment: coachText }).eq('id', entry.id);
+    await sb.from('diary_entries').update({coach_comment:coachText}).eq('id', entry.id);
     setCoachSaving(false); setCoachSaved(true);
-    setTimeout(() => setCoachSaved(false), 2000);
+    setTimeout(()=>setCoachSaved(false), 2000);
   }
 
   async function handleDelete() {
@@ -447,17 +406,15 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
     onDelete(entry.id);
   }
 
-  const btnLabel = aiMode === 'sparta' ? '🔥 スパルタ分析' : '🌸 やさしく分析';
-
   return (
     <div className="entry-card">
-      <div className="entry-header" onClick={() => setOpen(o => !o)}>
-        <div className="avatar" style={{background: dotColor}}>{initials}</div>
+      <div className="entry-header" onClick={() => setOpen(o=>!o)}>
+        <div className="avatar" style={{background:dotColor}}>{initials}</div>
         <div className="entry-meta">
           <div className="entry-name">{entry.user_name}</div>
           <div className="entry-date-row">{entry.entry_date}</div>
           <div className="badges">
-            <span className="badge badge-menu">{MENU_ICONS[entry.menu_type] || '🏃'} {entry.menu_type}</span>
+            <span className="badge badge-menu">{MENU_ICONS[entry.menu_type]||'🏃'} {entry.menu_type}</span>
             {dist && <span className="badge badge-dist">{dist}</span>}
             {time && <span className="badge badge-time">{time}</span>}
             {groupName && <span className="badge badge-group">👥 {groupName}</span>}
@@ -466,8 +423,8 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
           </div>
         </div>
         <div className="entry-actions">
-          <button className="btn-delete" disabled={deleting} onClick={e => { e.stopPropagation(); handleDelete(); }}>🗑️</button>
-          <div className="chevron">{open ? '▲' : '▼'}</div>
+          <button className="btn-delete" disabled={deleting} onClick={e=>{e.stopPropagation();handleDelete();}}>🗑️</button>
+          <div className="chevron">{open?'▲':'▼'}</div>
         </div>
       </div>
       {open && (
@@ -476,25 +433,25 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
             <span>体調 <span style={{color:'var(--green)'}}>{condStars}</span></span>
             <span>モチベ <span style={{color:'var(--yellow)'}}>{motivStars}</span></span>
           </div>
-          <div className="memo-text">{entry.memo || '（メモなし）'}</div>
+          <div className="memo-text">{entry.memo||'（メモなし）'}</div>
           <div className="ai-section">
             <button className={`btn-ai ${aiMode}`} disabled={analyzing} onClick={analyze}>
-              {analyzing ? <><span className="spinner">⟳</span> 分析中...</> : btnLabel}
+              {analyzing ? <><span className="spinner">⟳</span> 分析中...</> : aiMode==='sparta'?'🔥 スパルタ分析':'🌸 やさしく分析'}
             </button>
             {result && (
               <div>
                 <div className={`ai-result ${resultMode}`}>{result}</div>
-                <div className="ai-result-meta">{resultMode === 'sparta' ? '🔥 スパルタ' : '🌸 やさしめ'} モードで分析</div>
+                <div className="ai-result-meta">{resultMode==='sparta'?'🔥 スパルタ':'🌸 やさしめ'} モードで分析</div>
               </div>
             )}
           </div>
           <div className="coach-section">
             <div className="coach-label">📋 監督コメント</div>
             {entry.coach_comment && <div className="coach-existing">{entry.coach_comment}</div>}
-            <textarea className="coach-input" placeholder="コーチ・監督からのコメントを入力..."
-              value={coachText} rows={3} onChange={e => setCoachText(e.target.value)} />
-            <button className="btn-coach-save" disabled={coachSaving || !coachText.trim()} onClick={saveCoach}>
-              {coachSaved ? '✅ 保存しました' : coachSaving ? '保存中...' : 'コメントを保存'}
+            <textarea className="coach-input" placeholder="コーチ・監督からのコメント..."
+              value={coachText} rows={3} onChange={e=>setCoachText(e.target.value)} />
+            <button className="btn-coach-save" disabled={coachSaving||!coachText.trim()} onClick={saveCoach}>
+              {coachSaved?'✅ 保存しました':coachSaving?'保存中...':'コメントを保存'}
             </button>
           </div>
         </div>
@@ -505,72 +462,74 @@ function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
 
 function FeedTab({ entries, loading, aiMode, goal, onDelete, communities, feedFilter, setFeedFilter }) {
   if (communities.length === 0) {
-    return <div className="empty-state">グループに参加すると<br />チームの日誌が見られます<br /><br />👥 グループタブから参加・作成してください</div>;
+    return <div className="empty-state">グループに参加すると<br />チームの日誌が見られます<br /><br />👥 グループタブから参加・作成</div>;
   }
-  const filtered = feedFilter === 'all'
-    ? entries
-    : entries.filter(e => e.community_id === feedFilter);
-
+  const filtered = feedFilter === 'all' ? entries : entries.filter(e => e.community_id === feedFilter);
   return (
     <div>
       {communities.length > 1 && (
         <div className="community-filter">
-          <button className={`cf-btn ${feedFilter === 'all' ? 'active' : ''}`} onClick={() => setFeedFilter('all')}>すべて</button>
+          <button className={`cf-btn ${feedFilter==='all'?'active':''}`} onClick={() => setFeedFilter('all')}>すべて</button>
           {communities.map(c => (
-            <button key={c.id} className={`cf-btn ${feedFilter === c.id ? 'active' : ''}`} onClick={() => setFeedFilter(c.id)}>👥 {c.name}</button>
+            <button key={c.id} className={`cf-btn ${feedFilter===c.id?'active':''}`} onClick={() => setFeedFilter(c.id)}>👥 {c.name}</button>
           ))}
         </div>
       )}
-      {loading ? (
-        <div className="empty-state">⏳ 読み込み中...</div>
-      ) : !filtered.length ? (
-        <div className="empty-state">まだ日誌がありません<br />最初の一件を投稿してみよう！</div>
-      ) : (
-        <div className="content">
-          <div className="section-hint">クリックで展開 → AI分析・監督コメント</div>
-          <div style={{height:10}} />
-          {filtered.map(e => <EntryCard key={e.id} entry={e} aiMode={aiMode} goal={goal} onDelete={onDelete} communities={communities} />)}
-        </div>
-      )}
+      {loading ? <div className="empty-state">⏳ 読み込み中...</div>
+        : !filtered.length ? <div className="empty-state">まだ日誌がありません<br />最初の一件を書いてみよう！</div>
+        : (
+          <div className="content">
+            <div className="section-hint">クリックで展開 → AI分析・監督コメント</div>
+            <div style={{height:10}} />
+            {filtered.map(e => <EntryCard key={e.id} entry={e} aiMode={aiMode} goal={goal} onDelete={onDelete} communities={communities} />)}
+          </div>
+        )}
     </div>
   );
 }
 
-function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange }) {
+function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange, onSave, saving, goal, setGoal, aiAuto, communities, aiMode }) {
   const [selectedDate, setSelectedDate] = useState(null);
+  const [form, setForm] = useState(defaultForm());
 
   const entryMap = {};
-  calEntries.forEach(e => {
-    if (!entryMap[e.entry_date]) entryMap[e.entry_date] = [];
-    entryMap[e.entry_date].push(e);
-  });
+  calEntries.forEach(e => { if (!entryMap[e.entry_date]) entryMap[e.entry_date] = []; entryMap[e.entry_date].push(e); });
 
-  const monthlyKm = calEntries.filter(e => e.distance_km).reduce((s, e) => s + parseFloat(e.distance_km), 0);
-  const monthlyDays = Object.keys(entryMap).filter(d => entryMap[d].some(e => e.menu_type !== 'オフ')).length;
+  const monthlyKm = calEntries.filter(e=>e.distance_km).reduce((s,e)=>s+parseFloat(e.distance_km),0);
+  const monthlyDays = Object.keys(entryMap).filter(d=>entryMap[d].some(e=>e.menu_type!=='オフ')).length;
 
   const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  for (let i=0; i<firstDay; i++) cells.push(null);
+  for (let d=1; d<=daysInMonth; d++) cells.push(d);
+
+  function selectDate(dateStr) {
+    if (selectedDate === dateStr) { setSelectedDate(null); return; }
+    setSelectedDate(dateStr);
+    setForm(f => ({ ...f, entry_date: dateStr }));
+  }
+
+  async function handleSave() {
+    const ok = await onSave(form);
+    if (ok) {
+      setSelectedDate(null);
+      setForm(defaultForm());
+    }
+  }
 
   const selectedEntries = selectedDate ? (entryMap[selectedDate] || []) : [];
+  const weekDay = selectedDate ? ['日','月','火','水','木','金','土'][new Date(selectedDate).getDay()] : '';
 
   return (
     <div className="content">
       <div className="monthly-stats-bar">
-        <div className="monthly-stat">
-          <div className="stat-val">{monthlyKm.toFixed(1)}</div>
-          <div className="stat-lbl">km / 月</div>
-        </div>
-        <div className="monthly-stat">
-          <div className="stat-val">{monthlyDays}</div>
-          <div className="stat-lbl">練習日数</div>
-        </div>
+        <div className="monthly-stat"><div className="stat-val">{monthlyKm.toFixed(1)}</div><div className="stat-lbl">km / 月</div></div>
+        <div className="monthly-stat"><div className="stat-val">{monthlyDays}</div><div className="stat-lbl">練習日数</div></div>
       </div>
       <div className="cal-nav">
         <button className="cal-nav-btn" onClick={() => onMonthChange(-1)}>◀</button>
-        <span className="cal-title">{calYear}年 {calMonth + 1}月</span>
+        <span className="cal-title">{calYear}年 {calMonth+1}月</span>
         <button className="cal-nav-btn" onClick={() => onMonthChange(1)}>▶</button>
       </div>
       {calLoading ? <div className="empty-state">⏳</div> : (
@@ -580,31 +539,50 @@ function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange 
             if (!day) return <div key={`e${i}`} className="cal-cell empty" />;
             const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const de = entryMap[ds] || [];
-            const km = de.reduce((s, e) => s + (parseFloat(e.distance_km) || 0), 0);
+            const km = de.reduce((s,e)=>s+(parseFloat(e.distance_km)||0),0);
+            const isSelected = selectedDate === ds;
+            const isToday = ds === todayStr();
             return (
-              <div key={ds} className={`cal-cell ${de.length?'has-entry':''} ${selectedDate===ds?'selected':''} ${ds===todayStr()?'today':''}`}
-                onClick={() => de.length && setSelectedDate(selectedDate===ds?null:ds)}>
+              <div key={ds}
+                className={`cal-cell ${de.length?'has-entry':'clickable'} ${isSelected?'selected':''} ${isToday?'today':''}`}
+                onClick={() => selectDate(ds)}>
                 <div className="cal-day">{day}</div>
                 <div className="cal-dots">
-                  {de.slice(0,3).map((e,idx) => <div key={idx} className="cal-dot" style={{background: MENU_COLOR[e.menu_type]||'var(--accent)'}} />)}
+                  {de.slice(0,3).map((e,idx) => <div key={idx} className="cal-dot" style={{background:MENU_COLOR[e.menu_type]||'var(--accent)'}} />)}
                 </div>
-                {km > 0 && <div className="cal-km">{km.toFixed(0)}km</div>}
+                {km>0 && <div className="cal-km">{km.toFixed(0)}km</div>}
               </div>
             );
           })}
         </div>
       )}
-      {selectedDate && selectedEntries.length > 0 && (
-        <div className="cal-detail">
-          <div className="cal-detail-date">{selectedDate}</div>
-          {selectedEntries.map(e => (
-            <div key={e.id} className="cal-detail-entry">
-              <span className="cal-detail-name">{e.user_name}</span>
-              <span className="cal-detail-menu">{MENU_ICONS[e.menu_type]} {e.menu_type}</span>
-              {e.distance_km && <span className="cal-detail-km">{e.distance_km}km</span>}
-            </div>
-          ))}
+
+      {selectedDate ? (
+        <div className="date-panel">
+          <div className="date-panel-header">
+            <span className="date-panel-title">📅 {selectedDate} ({weekDay})</span>
+            <button className="date-panel-close" onClick={() => setSelectedDate(null)}>✕ 閉じる</button>
+          </div>
+          <div className="date-panel-body">
+            {selectedEntries.length > 0 && (
+              <div className="day-existing">
+                <div className="day-existing-title">この日の記録</div>
+                {selectedEntries.map(e => (
+                  <div key={e.id} className="day-mini-entry">
+                    <span className="day-mini-name">{e.user_name}</span>
+                    <span className="day-mini-menu">{MENU_ICONS[e.menu_type]} {e.menu_type}</span>
+                    {e.distance_km && <span className="day-mini-km">{e.distance_km}km</span>}
+                    {e.ai_feedback && <span className="badge badge-ai" style={{marginLeft:4}}>🤖</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <WriteForm form={form} setForm={setForm} saving={saving} onSave={handleSave}
+              goal={goal} setGoal={setGoal} aiAuto={aiAuto} communities={communities} />
+          </div>
         </div>
+      ) : (
+        <div className="date-select-hint">📅 日付をタップして日誌を書く</div>
       )}
     </div>
   );
@@ -617,86 +595,81 @@ function GroupTab({ communities, setCommunities }) {
   const [joining, setJoining] = useState(false);
   const [msg, setMsg] = useState('');
 
-  function showMsg(m) { setMsg(m); setTimeout(() => setMsg(''), 3000); }
+  function showMsg(m) { setMsg(m); setTimeout(()=>setMsg(''), 3000); }
 
   async function createGroup() {
     if (!createName.trim()) return;
     setCreating(true);
-    let code = generateCode();
-    let attempts = 0;
+    let code = generateCode(), attempts = 0;
     while (attempts < 5) {
       const { data } = await sb.from('communities').select('id').eq('invite_code', code);
-      if (!data || data.length === 0) break;
+      if (!data || data.length===0) break;
       code = generateCode(); attempts++;
     }
-    const { data, error } = await sb.from('communities').insert([{ name: createName.trim(), invite_code: code }]).select().single();
+    const { data, error } = await sb.from('communities').insert([{name:createName.trim(), invite_code:code}]).select().single();
     if (!error && data) {
       const updated = [...communities, data];
       setCommunities(updated); saveMyCommunities(updated);
       setCreateName('');
       showMsg(`作成しました！招待コード: ${code}`);
-    } else { showMsg('作成失敗: ' + (error?.message || 'テーブルが未作成の可能性があります')); }
+    } else {
+      showMsg('作成失敗: ' + (error?.message || 'SQLが未実行の可能性があります'));
+    }
     setCreating(false);
   }
 
   async function joinGroup() {
     const code = joinCode.trim().toUpperCase();
-    if (code.length !== 6) return;
-    if (communities.some(c => c.invite_code === code)) { showMsg('すでに参加しています'); return; }
+    if (code.length!==6) return;
+    if (communities.some(c=>c.invite_code===code)) { showMsg('すでに参加しています'); return; }
     setJoining(true);
     const { data, error } = await sb.from('communities').select('*').eq('invite_code', code).single();
     if (!error && data) {
       const updated = [...communities, data];
       setCommunities(updated); saveMyCommunities(updated);
-      setJoinCode('');
-      showMsg(`「${data.name}」に参加しました！`);
+      setJoinCode(''); showMsg(`「${data.name}」に参加しました！`);
     } else { showMsg('コードが見つかりません'); }
     setJoining(false);
   }
 
   function leaveGroup(id) {
-    const updated = communities.filter(c => c.id !== id);
+    const updated = communities.filter(c=>c.id!==id);
     setCommunities(updated); saveMyCommunities(updated);
   }
 
-  function copyCode(code) {
-    navigator.clipboard.writeText(code).then(() => showMsg('コードをコピーしました'));
-  }
+  function copyCode(code) { navigator.clipboard.writeText(code).then(()=>showMsg('コードをコピーしました')); }
 
   return (
     <div className="content">
-      {msg && <div className="ai-auto-notice">{msg}</div>}
-
+      {msg && <div className="msg-box">{msg}</div>}
       <div className="group-section">
         <div className="group-section-title">参加中のグループ</div>
-        {communities.length === 0 && <div className="group-empty">グループに参加していません</div>}
+        {communities.length===0 && <div className="group-empty">グループ未参加。下から作成 or 参加してください。</div>}
         {communities.map(c => (
           <div key={c.id} className="group-card">
-            <div className="group-card-info">
-              <div className="group-name">👥 {c.name}</div>
-              <div className="group-code">招待コード: {c.invite_code}</div>
-            </div>
+            <div><div className="group-name">👥 {c.name}</div><div className="group-code">コード: {c.invite_code}</div></div>
             <div className="group-btns">
-              <button className="btn-copy" onClick={() => copyCode(c.invite_code)}>コピー</button>
-              <button className="btn-leave" onClick={() => leaveGroup(c.id)}>退出</button>
+              <button className="btn-copy" onClick={()=>copyCode(c.invite_code)}>コピー</button>
+              <button className="btn-leave" onClick={()=>leaveGroup(c.id)}>退出</button>
             </div>
           </div>
         ))}
       </div>
-
       <div className="group-section">
         <div className="group-section-title">グループを作成</div>
         <div className="input-row">
-          <input type="text" value={createName} placeholder="グループ名（例：駅伝部A組）" onChange={e => setCreateName(e.target.value)} onKeyDown={e => e.key==='Enter' && createGroup()} />
-          <button className="btn-action" disabled={!createName.trim() || creating} onClick={createGroup}>作成</button>
+          <input type="text" value={createName} placeholder="グループ名（例：駅伝部A組）"
+            onChange={e=>setCreateName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createGroup()} />
+          <button className="btn-action" disabled={!createName.trim()||creating} onClick={createGroup}>作成</button>
         </div>
       </div>
-
       <div className="group-section">
         <div className="group-section-title">コードで参加</div>
         <div className="input-row">
-          <input type="text" value={joinCode} placeholder="6桁のコードを入力" maxLength={6} style={{textTransform:'uppercase',letterSpacing:'2px'}} onChange={e => setJoinCode(e.target.value)} onKeyDown={e => e.key==='Enter' && joinGroup()} />
-          <button className="btn-action" disabled={joinCode.trim().length !== 6 || joining} onClick={joinGroup}>参加</button>
+          <input type="text" value={joinCode} placeholder="6桁のコード" maxLength={6}
+            style={{textTransform:'uppercase',letterSpacing:'2px'}}
+            onChange={e=>setJoinCode(e.target.value)} onKeyDown={e=>e.key==='Enter'&&joinGroup()} />
+          <button className="btn-action" disabled={joinCode.trim().length!==6||joining} onClick={joinGroup}>参加</button>
         </div>
       </div>
     </div>
@@ -704,13 +677,12 @@ function GroupTab({ communities, setCommunities }) {
 }
 
 function App() {
-  const [tab, setTab] = useState('write');
+  const [tab, setTab] = useState('calendar');
   const [aiMode, setAiMode] = useState('gentle');
   const [aiAuto, setAiAuto] = useState(localStorage.getItem('diary_aiauto') !== 'off');
   const [goal, setGoal] = useState(localStorage.getItem('diary_goal') || '');
   const [communities, setCommunities] = useState(getMyCommunities());
   const [entries, setEntries] = useState([]);
-  const [form, setForm] = useState(defaultForm());
   const [saving, setSaving] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedFilter, setFeedFilter] = useState('all');
@@ -719,67 +691,63 @@ function App() {
   const [calEntries, setCalEntries] = useState([]);
   const [calLoading, setCalLoading] = useState(false);
 
-  useEffect(() => { loadEntries(); }, []);
-  useEffect(() => { if (tab === 'calendar') loadCalEntries(calYear, calMonth); }, [tab, calYear, calMonth]);
+  useEffect(() => { loadEntries(); }, [communities]);
+  useEffect(() => { loadCalEntries(calYear, calMonth); }, [calYear, calMonth, communities]);
 
   async function loadEntries() {
+    const ids = communities.map(c=>c.id);
+    if (!ids.length) { setEntries([]); return; }
     setFeedLoading(true);
-    const ids = communities.map(c => c.id);
-    if (ids.length === 0) { setEntries([]); setFeedLoading(false); return; }
     const { data } = await sb.from('diary_entries').select('*')
-      .in('community_id', ids)
-      .order('entry_date', { ascending: false }).order('created_at', { ascending: false }).limit(60);
-    setEntries(data || []);
+      .in('community_id', ids).order('entry_date',{ascending:false}).order('created_at',{ascending:false}).limit(60);
+    setEntries(data||[]);
     setFeedLoading(false);
   }
 
   async function loadCalEntries(year, month) {
+    const ids = communities.map(c=>c.id);
+    if (!ids.length) { setCalEntries([]); return; }
     setCalLoading(true);
-    const ids = communities.map(c => c.id);
-    if (ids.length === 0) { setCalEntries([]); setCalLoading(false); return; }
     const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
-    const to = `${year}-${String(month+1).padStart(2,'0')}-${String(new Date(year, month+1, 0).getDate()).padStart(2,'0')}`;
-    const { data } = await sb.from('diary_entries').select('*').in('community_id', ids).gte('entry_date', from).lte('entry_date', to);
-    setCalEntries(data || []);
+    const to = `${year}-${String(month+1).padStart(2,'0')}-${String(new Date(year,month+1,0).getDate()).padStart(2,'0')}`;
+    const { data } = await sb.from('diary_entries').select('*').in('community_id', ids).gte('entry_date',from).lte('entry_date',to);
+    setCalEntries(data||[]);
     setCalLoading(false);
   }
 
-  async function saveEntry() {
+  async function saveEntry(form) {
     setSaving(true);
     const payload = {
       entry_date: form.entry_date, user_name: form.user_name.trim(), menu_type: form.menu_type,
       distance_km: form.distance_km ? parseFloat(form.distance_km) : null,
       time_min: form.time_min ? parseFloat(form.time_min) : null,
       condition_score: form.condition_score, motivation_score: form.motivation_score,
-      memo: form.memo.trim(), community_id: form.community_id || null,
+      memo: form.memo.trim(), community_id: form.community_id||null,
     };
     const { data, error } = await sb.from('diary_entries').insert([payload]).select();
     if (!error) {
       if (aiAuto && data && data[0]) {
         try {
           const aiText = await callAI(buildPrompt(data[0], aiMode, goal));
-          await sb.from('diary_entries').update({ ai_feedback: aiText, ai_mode: aiMode }).eq('id', data[0].id);
+          await sb.from('diary_entries').update({ai_feedback:aiText, ai_mode:aiMode}).eq('id', data[0].id);
         } catch(e) { /* AI失敗でも投稿は維持 */ }
       }
-      setForm(defaultForm());
       await loadEntries();
-      setTab('feed');
+      await loadCalEntries(calYear, calMonth);
+      setSaving(false);
+      return true;
     } else {
       alert('保存に失敗しました: ' + error.message);
+      setSaving(false);
+      return false;
     }
-    setSaving(false);
   }
 
-  function toggleAiAuto() {
-    const next = !aiAuto; setAiAuto(next);
-    localStorage.setItem('diary_aiauto', next ? 'on' : 'off');
-  }
-
-  function handleDelete(id) { setEntries(es => es.filter(e => e.id !== id)); }
-
-  function handleMonthChange(delta) {
-    let m = calMonth + delta, y = calYear;
-    if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; }
+  function toggleAiAuto() { const n=!aiAuto; setAiAuto(n); localStorage.setItem('diary_aiauto',n?'on':'off'); }
+  function handleDelete(id) { setEntries(es=>es.filter(e=>e.id!==id)); setCalEntries(es=>es.filter(e=>e.id!==id)); }
+  function handleMonthChange(d) {
+    let m=calMonth+d, y=calYear;
+    if(m<0){m=11;y--;} if(m>11){m=0;y++;}
     setCalMonth(m); setCalYear(y);
   }
 
@@ -788,23 +756,21 @@ function App() {
       <div className="header">
         <div className="logo">Run<span>Diary</span></div>
         <div className="header-right">
-          <button className={`ai-auto-btn ${aiAuto ? 'on' : ''}`} onClick={toggleAiAuto} title="投稿時AI自動分析">🤖 {aiAuto ? 'ON' : 'OFF'}</button>
+          <button className={`ai-auto-btn ${aiAuto?'on':''}`} onClick={toggleAiAuto} title="投稿時AI自動分析">🤖 {aiAuto?'ON':'OFF'}</button>
           <div className="mode-toggle">
-            <button className={`mode-btn ${aiMode==='sparta'?'active-sparta':''}`} onClick={() => setAiMode('sparta')}>🔥 スパルタ</button>
-            <button className={`mode-btn ${aiMode==='gentle'?'active-gentle':''}`} onClick={() => setAiMode('gentle')}>🌸 やさしめ</button>
+            <button className={`mode-btn ${aiMode==='sparta'?'active-sparta':''}`} onClick={()=>setAiMode('sparta')}>🔥</button>
+            <button className={`mode-btn ${aiMode==='gentle'?'active-gentle':''}`} onClick={()=>setAiMode('gentle')}>🌸</button>
           </div>
         </div>
       </div>
       <div className="tabs">
-        <button className={`tab-btn ${tab==='write'?'active':''}`} onClick={() => setTab('write')}>📝 書く</button>
-        <button className={`tab-btn ${tab==='feed'?'active':''}`} onClick={() => { setTab('feed'); loadEntries(); }}>📋 日誌</button>
-        <button className={`tab-btn ${tab==='calendar'?'active':''}`} onClick={() => setTab('calendar')}>📅 カレンダー</button>
-        <button className={`tab-btn ${tab==='group'?'active':''}`} onClick={() => setTab('group')}>👥 グループ</button>
+        <button className={`tab-btn ${tab==='calendar'?'active':''}`} onClick={()=>setTab('calendar')}>📅 カレンダー</button>
+        <button className={`tab-btn ${tab==='feed'?'active':''}`} onClick={()=>{setTab('feed');loadEntries();}}>📋 日誌</button>
+        <button className={`tab-btn ${tab==='group'?'active':''}`} onClick={()=>setTab('group')}>👥 グループ</button>
       </div>
-      {tab === 'write' && <WriteTab form={form} setForm={setForm} saving={saving} onSave={saveEntry} goal={goal} setGoal={setGoal} aiAuto={aiAuto} communities={communities} />}
-      {tab === 'feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} goal={goal} onDelete={handleDelete} communities={communities} feedFilter={feedFilter} setFeedFilter={setFeedFilter} />}
-      {tab === 'calendar' && <CalendarTab calEntries={calEntries} calLoading={calLoading} calYear={calYear} calMonth={calMonth} onMonthChange={handleMonthChange} />}
-      {tab === 'group' && <GroupTab communities={communities} setCommunities={setCommunities} />}
+      {tab==='calendar' && <CalendarTab calEntries={calEntries} calLoading={calLoading} calYear={calYear} calMonth={calMonth} onMonthChange={handleMonthChange} onSave={saveEntry} saving={saving} goal={goal} setGoal={setGoal} aiAuto={aiAuto} communities={communities} aiMode={aiMode} />}
+      {tab==='feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} goal={goal} onDelete={handleDelete} communities={communities} feedFilter={feedFilter} setFeedFilter={setFeedFilter} />}
+      {tab==='group' && <GroupTab communities={communities} setCommunities={setCommunities} />}
     </div>
   );
 }
