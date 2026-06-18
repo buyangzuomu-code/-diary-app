@@ -171,6 +171,30 @@
       font-size: 12px; color: var(--muted); text-align: center; padding: 10px 0 4px;
       border-top: 1px solid var(--border); margin-top: 16px;
     }
+
+    .menu-desc {
+      margin-top: 7px; font-size: 12px; color: var(--muted); line-height: 1.6;
+      padding: 8px 12px; background: var(--surface); border-radius: 6px;
+      border-left: 2px solid var(--accent);
+    }
+
+    .share-toggle {
+      display: flex; align-items: center; gap: 14px; cursor: pointer;
+      padding: 12px 14px; background: var(--surface2); border-radius: 8px;
+      border: 1px solid var(--border); transition: border-color 0.2s;
+    }
+    .share-toggle:hover { border-color: #444; }
+    .toggle-track {
+      width: 44px; height: 24px; background: #333; border-radius: 12px;
+      position: relative; flex-shrink: 0; transition: background 0.2s;
+    }
+    .toggle-track.on { background: var(--accent); }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+      background: #fff; border-radius: 50%; transition: transform 0.2s;
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+    .toggle-label { font-size: 13px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -189,6 +213,18 @@ const MENU_ICONS = {
   'ジョグ':'🏃','ペース走':'⚡','インターバル':'🔁','閾値走':'💨',
   'ロング走':'🛤️','レース':'🏆','クロカン':'🌲','補強・筋トレ':'💪','オフ':'🛋️','その他':'📋'
 };
+const MENU_DESC = {
+  'ジョグ':       '会話できる強度（最大心拍65〜75%）で有酸素基盤を積み上げる基本練習',
+  'ペース走':     '目標レースペース±5秒/kmで20〜40分継続。LT向上に効果的',
+  'インターバル': '高強度（vVO2max相当）×短休憩を反復。速筋・心肺機能の強化',
+  '閾値走':       'LT（乳酸性作業閾値）ペースで20〜30分。長距離のランニングエコノミー向上',
+  'ロング走':     '最大心拍70%以下で90〜150分。脂質代謝・毛細血管密度の向上',
+  'レース':       '公式または非公式の競技。フォーム・レースマネジメントの確認',
+  'クロカン':     '不整地走で固有感覚・臀部・体幹を総合強化。怪我予防にも有効',
+  '補強・筋トレ': 'コア・股関節・体幹の強化。ランニングフォームの安定に直結',
+  'オフ':         '積極的休養日。筋の超回復を促し翌日の練習の質を高める',
+  'その他':       '指定なしの練習やウォームアップ・クールダウン等',
+};
 
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function defaultForm() {
@@ -201,6 +237,7 @@ function defaultForm() {
     condition_score: 3,
     motivation_score: 3,
     memo: '',
+    is_public: true,
   };
 }
 
@@ -219,49 +256,64 @@ async function callAI(prompt) {
   return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
 }
 
-function buildPrompt(entry, mode) {
-  const dist = entry.distance_km ? `${entry.distance_km}km` : '距離未記録';
-  const time = entry.time_min ? `${entry.time_min}分` : '時間未記録';
-  const cond = '★'.repeat(entry.condition_score || 3) + '☆'.repeat(5 - (entry.condition_score || 3));
-  const motiv = '★'.repeat(entry.motivation_score || 3) + '☆'.repeat(5 - (entry.motivation_score || 3));
-  const memo = entry.memo || '（メモなし）';
+function buildPrompt(entry, mode, goal) {
+  const dist = entry.distance_km ? `${entry.distance_km}km` : '未記録';
+  const time = entry.time_min ? `${entry.time_min}分` : '未記録';
+  const pace = (entry.distance_km && entry.time_min)
+    ? (() => { const s = Math.round(entry.time_min / entry.distance_km * 60); return `${Math.floor(s/60)}'${String(s%60).padStart(2,'0')}"／km`; })()
+    : null;
+  const cond = entry.condition_score || 3;
+  const motiv = entry.motivation_score || 3;
+  const memo = entry.memo || '（なし）';
+  const goalLine = goal ? `目標: ${goal}` : '目標: 未設定';
+  const paceInfo = pace ? `　平均ペース: ${pace}` : '';
 
   if (mode === 'sparta') {
-    return `あなたは元箱根ランナーで現在は実業団コーチの厳格な指導者です。甘えを一切許さず、選手の練習日誌を鋭く分析してください。
+    return `あなたはJack Danielsのランニングフォーミュラを熟知し、箱根駅伝・実業団で指導実績を持つ厳格なコーチです。生理学・トレーニング理論に基づき、選手の練習日誌を容赦なく分析してください。
 
-選手: ${entry.user_name}
+【選手データ】
+名前: ${entry.user_name}
+${goalLine}
 日付: ${entry.entry_date}
-練習: ${entry.menu_type}　${dist}　${time}
-体調: ${cond}　モチベーション: ${motiv}
+練習種別: ${entry.menu_type}
+距離/時間: ${dist} / ${time}${paceInfo}
+体調: ${cond}/5　モチベーション: ${motiv}/5
 本人コメント: 「${memo}」
 
-以下の形式で日本語で回答してください：
-【総評】
-（2〜3文で率直かつ厳しく評価）
-【問題点・改善すべき点】
-（具体的に容赦なく指摘）
-【次回への指示】
-（明確なトレーニング指示と意識事項）
+以下の各項目を専門的かつ具体的に、厳しく回答してください：
+【練習の質評価】
+今日の練習強度・量・種別をVO2max強度・LTペース・運動強度ゾーンの観点で数値根拠を交えて評価すること
+【目標との整合性】
+設定目標の達成に向け、今日の練習が適切だったか。不足点・過剰点を明確に
+【問題点と改善指示】
+フォーム・ペース配分・距離・本数・レスト等について具体的数値を挙げて指摘
+【次回の練習処方】
+目標に向けた具体的な練習内容（種別・距離・ペース・本数等）を処方として提示
 【一言】
-（選手を奮い立たせる厳しくも熱い言葉）`;
+甘えを許さない、魂に響く激励`;
   } else {
-    return `あなたは選手に寄り添う優しいランニングコーチです。選手の頑張りを認め、ポジティブに励ましながらアドバイスしてください。
+    return `あなたはスポーツ科学と選手心理に精通した、選手に寄り添う優しいランニングコーチです。科学的根拠を大切にしながら、選手が自信を持って次の練習に臨めるようサポートしてください。
 
-選手: ${entry.user_name}
+【選手データ】
+名前: ${entry.user_name}
+${goalLine}
 日付: ${entry.entry_date}
-練習: ${entry.menu_type}　${dist}　${time}
-体調: ${cond}　モチベーション: ${motiv}
+練習種別: ${entry.menu_type}
+距離/時間: ${dist} / ${time}${paceInfo}
+体調: ${cond}/5　モチベーション: ${motiv}/5
 本人コメント: 「${memo}」
 
-以下の形式で日本語で回答してください：
-【振り返り】
-（2〜3文で温かく今日の練習を総括）
-【良かった点】
-（具体的に褒めてモチベートする）
-【次回へのアドバイス】
-（無理なく続けられる優しい提案）
+以下の各項目を温かく、かつ専門的に回答してください：
+【今日の練習の振り返り】
+体調・強度・練習種別を踏まえ、今日の取り組みを肯定的に総括
+【目標に向かっている点】
+今日の練習が目標達成にどう貢献しているかを具体的に
+【体のケアとリカバリー】
+今日の練習量・強度に応じた回復のアドバイス（栄養・睡眠・ストレッチ等）
+【次回のアドバイス】
+無理なく続けられる、目標に向けた具体的な練習提案
 【応援メッセージ】
-（心が温まる一言）`;
+前向きになれる温かい一言`;
   }
 }
 
@@ -279,7 +331,7 @@ function Stars({ value, onChange, type }) {
   );
 }
 
-function WriteTab({ form, setForm, saving, onSave }) {
+function WriteTab({ form, setForm, saving, onSave, goal, setGoal }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const canSave = form.user_name.trim() && form.memo.trim();
 
@@ -298,10 +350,19 @@ function WriteTab({ form, setForm, saving, onSave }) {
         <div className="sub-hint">次回から自動で入力されます</div>
       </div>
       <div className="form-group">
+        <label>🎯 目標（任意）</label>
+        <input
+          type="text" value={goal} placeholder="例：10000m 27:30切り　箱根駅伝3区区間賞"
+          onChange={e => { setGoal(e.target.value); localStorage.setItem('diary_goal', e.target.value); }}
+        />
+        <div className="sub-hint">AI分析で目標との整合性を評価します。変更すると次回から反映</div>
+      </div>
+      <div className="form-group">
         <label>練習種目</label>
         <select value={form.menu_type} onChange={e => set('menu_type', e.target.value)}>
           {MENU_TYPES.map(m => <option key={m} value={m}>{MENU_ICONS[m]} {m}</option>)}
         </select>
+        <div className="menu-desc">{MENU_DESC[form.menu_type]}</div>
       </div>
       <div className="row-2">
         <div className="form-group">
@@ -327,9 +388,22 @@ function WriteTab({ form, setForm, saving, onSave }) {
         <label>今日の練習メモ</label>
         <textarea
           value={form.memo} rows={5}
-          placeholder={`今日の練習について書いてください。\n体の感覚、ペース感、気持ち、反省点など何でも。`}
+          placeholder={`今日の練習を記録してください。\nペース・本数・体の感覚・気づきなど。`}
           onChange={e => set('memo', e.target.value)}
         />
+      </div>
+      <div className="form-group">
+        <div className="share-toggle" onClick={() => set('is_public', !form.is_public)}>
+          <div className={`toggle-track ${form.is_public ? 'on' : ''}`}>
+            <div className="toggle-thumb" />
+          </div>
+          <div className="toggle-label">
+            <span>{form.is_public ? '📢 チームに公開' : '🔒 自分のみ'}</span>
+            <div className="sub-hint" style={{marginTop:2}}>
+              {form.is_public ? 'チーム日誌に表示されます' : 'チーム日誌には表示されません'}
+            </div>
+          </div>
+        </div>
       </div>
       <button className="btn-primary" disabled={!canSave || saving} onClick={onSave}>
         {saving ? '投稿中...' : '📝 日誌を投稿する'}
@@ -338,7 +412,7 @@ function WriteTab({ form, setForm, saving, onSave }) {
   );
 }
 
-function EntryCard({ entry, aiMode }) {
+function EntryCard({ entry, aiMode, goal }) {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState(entry.ai_feedback || '');
   const [resultMode, setResultMode] = useState(entry.ai_mode || '');
@@ -354,7 +428,7 @@ function EntryCard({ entry, aiMode }) {
     setAnalyzing(true);
     setResult('');
     try {
-      const text = await callAI(buildPrompt(entry, aiMode));
+      const text = await callAI(buildPrompt(entry, aiMode, goal));
       setResult(text);
       setResultMode(aiMode);
       await sb.from('diary_entries').update({ ai_feedback: text, ai_mode: aiMode }).eq('id', entry.id);
@@ -409,18 +483,18 @@ function EntryCard({ entry, aiMode }) {
   );
 }
 
-function FeedTab({ entries, loading, aiMode }) {
+function FeedTab({ entries, loading, aiMode, goal }) {
   if (loading) {
     return <div className="empty-state">⏳ 読み込み中...</div>;
   }
   if (!entries.length) {
-    return <div className="empty-state">まだ日誌がありません。<br />最初の一件を投稿してみよう！</div>;
+    return <div className="empty-state">まだ公開された日誌がありません。<br />最初の一件を投稿してみよう！</div>;
   }
   return (
     <div className="content">
       <div className="section-hint">クリックで展開 → AIに分析させる</div>
       <div style={{height:12}} />
-      {entries.map(e => <EntryCard key={e.id} entry={e} aiMode={aiMode} />)}
+      {entries.map(e => <EntryCard key={e.id} entry={e} aiMode={aiMode} goal={goal} />)}
     </div>
   );
 }
@@ -428,6 +502,7 @@ function FeedTab({ entries, loading, aiMode }) {
 function App() {
   const [tab, setTab] = useState('write');
   const [aiMode, setAiMode] = useState('gentle');
+  const [goal, setGoal] = useState(localStorage.getItem('diary_goal') || '');
   const [entries, setEntries] = useState([]);
   const [form, setForm] = useState(defaultForm());
   const [saving, setSaving] = useState(false);
@@ -439,6 +514,7 @@ function App() {
     setFeedLoading(true);
     const { data } = await sb.from('diary_entries')
       .select('*')
+      .eq('is_public', true)
       .order('entry_date', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(60);
@@ -457,6 +533,7 @@ function App() {
       condition_score: form.condition_score,
       motivation_score: form.motivation_score,
       memo: form.memo.trim(),
+      is_public: form.is_public,
     }]);
     if (!error) {
       setForm(defaultForm());
@@ -491,8 +568,8 @@ function App() {
           📋 チーム日誌
         </button>
       </div>
-      {tab === 'write' && <WriteTab form={form} setForm={setForm} saving={saving} onSave={saveEntry} />}
-      {tab === 'feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} />}
+      {tab === 'write' && <WriteTab form={form} setForm={setForm} saving={saving} onSave={saveEntry} goal={goal} setGoal={setGoal} />}
+      {tab === 'feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} goal={goal} />}
     </div>
   );
 }
