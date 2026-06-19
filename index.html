@@ -185,9 +185,96 @@ input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
 .auth-switch{text-align:center;font-size:13px;color:var(--muted);margin-top:16px}
 .auth-switch button{background:none;border:none;color:var(--accent);font-weight:700;cursor:pointer;padding:0}
 .auth-msg{padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.6;margin-bottom:14px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#fdba74}
+/* ===== Vivid + rounded refresh ===== */
+body{background:radial-gradient(1100px 560px at 50% -8%, #1c1510, var(--bg))}
+.btn-primary{background:linear-gradient(135deg,#fb923c,#f97316);box-shadow:0 6px 18px rgba(249,115,22,.30);border-radius:14px}
+.btn-action{background:linear-gradient(135deg,#fb923c,#f97316);border-radius:12px}
+.entry-card{border-radius:18px}
+.group-card{border-radius:16px}
+input,select,textarea{border-radius:12px}
+.badge{border-radius:999px}
+.menu-desc{border-radius:11px}
+.cal-cell{border-radius:11px}
+.monthly-stats-bar{border-radius:18px;background:linear-gradient(135deg,#271c12,#242424)}
+.stat-val{background:linear-gradient(135deg,#fb923c,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tab-btn.active{color:var(--accent)}
+.logo{font-size:19px}
+.tabs{border-radius:0}
+/* coach toggle (header) */
+.coach-toggle{display:flex;gap:5px;background:var(--surface2);padding:4px;border-radius:24px}
+.coach-pick{width:38px;height:38px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:.4;filter:grayscale(.7);transition:all .2s}
+.coach-pick.active{opacity:1;filter:none}
+.coach-pick.sparta.active{border-color:#ef4444;background:rgba(239,68,68,.14)}
+.coach-pick.gentle.active{border-color:#60a5fa;background:rgba(96,165,250,.14)}
+/* coach banner (entry AI section) */
+.coach-banner{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;margin-bottom:11px}
+.coach-banner.sparta{background:linear-gradient(135deg,rgba(239,68,68,.14),rgba(127,29,29,.18));border:1px solid var(--red-dark)}
+.coach-banner.gentle{background:linear-gradient(135deg,rgba(96,165,250,.14),rgba(30,58,95,.18));border:1px solid var(--blue-dark)}
+.coach-banner-name{font-size:14px;font-weight:800}
+.coach-banner.sparta .coach-banner-name{color:#fca5a5}
+.coach-banner.gentle .coach-banner-name{color:#93c5fd}
+.coach-banner-sub{font-size:11px;color:var(--muted)}
+/* ai bubble */
+.ai-bubble{display:flex;gap:10px;margin-top:11px;align-items:flex-start}
+.ai-bubble-body{flex:1;padding:12px 14px;border-radius:14px;border-top-left-radius:3px;font-size:13px;line-height:1.85;white-space:pre-wrap}
+.ai-bubble.sparta .ai-bubble-body{background:#180808;border:1px solid var(--red-dark);color:#fecaca}
+.ai-bubble.gentle .ai-bubble-body{background:#08101a;border:1px solid var(--blue-dark);color:#bfdbfe}
+/* goal card */
+.goal-card{background:linear-gradient(135deg,#271c12,var(--surface));border:1px solid var(--border);border-radius:18px;padding:15px 16px;margin-bottom:14px}
+.goal-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.goal-current{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.goal-text{flex:1;min-width:140px;font-size:17px;font-weight:800}
+.goal-btns{display:flex;gap:7px}
+.goal-achieve{padding:9px 15px;border:none;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#4ade80,#22c55e);color:#06210f}
+.goal-del{padding:9px 13px;border:1px solid #3a3a3a;border-radius:11px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#888}
+.goal-del:hover{color:#ef4444;border-color:#ef4444}
+.goal-set-row{display:flex;gap:8px}
+.goal-set-row input{flex:1}
+.goal-set-btn{padding:10px 16px;border:none;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;white-space:nowrap}
+.goal-set-btn:disabled{opacity:.5;cursor:not-allowed}
+.goal-empty-hint{font-size:11px;color:var(--muted);margin-top:8px}
+.goal-done-toggle{margin-top:12px;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-weight:700;padding:0}
+.goal-done-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.goal-done-item{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--surface2);border-radius:11px;font-size:13px}
+.goal-done-check{color:#4ade80;font-weight:800}
+.goal-done-text{flex:1;text-decoration:line-through;color:#aaa}
+.goal-done-date{font-size:11px;color:var(--muted)}
+.goal-done-del{background:none;border:none;color:#555;cursor:pointer;font-size:13px}
+.goal-done-del:hover{color:#ef4444}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<radialGradient id="oniShade" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#991b1b"/></radialGradient>
+<radialGradient id="genShade" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#fde7cf"/><stop offset="100%" stop-color="#f6cfa0"/></radialGradient>
+<symbol id="oni" viewBox="0 0 100 100">
+<circle cx="50" cy="52" r="38" fill="url(#oniShade)"/>
+<path d="M30 22 Q26 8 36 12 Q33 20 38 26 Z" fill="#f3f4f6"/>
+<path d="M70 22 Q74 8 64 12 Q67 20 62 26 Z" fill="#f3f4f6"/>
+<path d="M18 44 Q20 26 34 24 Q40 30 50 28 Q60 30 66 24 Q80 26 82 44 Q72 36 50 38 Q28 36 18 44Z" fill="#1f2937"/>
+<path d="M28 44 L44 50" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<path d="M72 44 L56 50" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<circle cx="37" cy="55" r="5.5" fill="#fff"/><circle cx="37" cy="56" r="2.8" fill="#111"/>
+<circle cx="63" cy="55" r="5.5" fill="#fff"/><circle cx="63" cy="56" r="2.8" fill="#111"/>
+<path d="M36 70 Q50 64 64 70 Q50 82 36 70Z" fill="#3b0a0a"/>
+<path d="M36 70 Q50 67 64 70" stroke="#fff" stroke-width="2.5" fill="none"/>
+<path d="M44 67 L44 75 M50 66 L50 76 M56 67 L56 75" stroke="#fff" stroke-width="1.6"/>
+<path d="M70 36 q4 0 4 4 q0 -4 4 -4 q-4 0 -4 -4 q0 4 -4 4Z" fill="#fca5a5"/>
+</symbol>
+<symbol id="gentle" viewBox="0 0 100 100">
+<circle cx="50" cy="52" r="38" fill="url(#genShade)"/>
+<path d="M16 46 Q18 24 38 22 Q44 26 50 25 Q56 26 62 22 Q82 24 84 46 Q74 34 50 36 Q26 34 16 46Z" fill="#5b3b1f"/>
+<path d="M30 46 Q37 43 44 46" stroke="#7c5a36" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M56 46 Q63 43 70 46" stroke="#7c5a36" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M32 56 Q38 50 44 56" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+<path d="M56 56 Q62 50 68 56" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+<circle cx="32" cy="64" r="5" fill="#f9a8a8" opacity=".55"/>
+<circle cx="68" cy="64" r="5" fill="#f9a8a8" opacity=".55"/>
+<path d="M38 66 Q50 78 62 66" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</symbol>
+</defs>
+</svg>
 <div id="root"></div>
 <script type="text/babel">
 /** @jsxRuntime classic */
@@ -195,7 +282,7 @@ const { useState, useEffect } = React;
 const SUPABASE_URL = 'https://rndewdcuvewyalxvfoqi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_pqSIdB7XK7-Dltr_AVBhLQ_yrOhwNSN';
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 
 const MENU_TYPES = ['ジョグ','ペース走','インターバル','閾値走','ロング走','レース','クロカン','補強・筋トレ','オフ','その他'];
 const MENU_ICONS = {'ジョグ':'🏃','ペース走':'⚡','インターバル':'🔁','閾値走':'💨','ロング走':'🛤️','レース':'🏆','クロカン':'🌲','補強・筋トレ':'💪','オフ':'🛋️','その他':'📋'};
@@ -217,6 +304,8 @@ const DAY_NAMES = ['日','月','火','水','木','金','土'];
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function getMyCommunities() { try { return JSON.parse(localStorage.getItem('diary_communities') || '[]'); } catch { return []; } }
 function saveMyCommunities(cs) { localStorage.setItem('diary_communities', JSON.stringify(cs)); }
+function getGoalsDone() { try { return JSON.parse(localStorage.getItem('diary_goals_done') || '[]'); } catch { return []; } }
+function saveGoalsDone(g) { localStorage.setItem('diary_goals_done', JSON.stringify(g)); }
 function generateCode() {
 const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
@@ -278,6 +367,12 @@ ${goalLine}
 }
 }
 
+function CoachIcon({ mode, size = 32 }) {
+return (<svg width={size} height={size} viewBox="0 0 100 100"><use href={mode === 'sparta' ? '#oni' : '#gentle'} /></svg>);
+}
+const COACH_NAME = { sparta: '鬼軍曹コーチ', gentle: 'やさしめコーチ' };
+const COACH_TAG = { sparta: '容赦なく喝を入れる', gentle: 'そっと寄り添う' };
+
 function Stars({ value, onChange, type }) {
 return (
 <div className="stars">
@@ -297,11 +392,6 @@ return (
 <label>名前</label>
 <input type="text" value={form.user_name} placeholder="例：佐藤 大地"
 onChange={e => { set('user_name', e.target.value); localStorage.setItem('diary_name', e.target.value); }} />
-</div>
-<div className="form-group">
-<label>🎯 目標（任意）</label>
-<input type="text" value={goal} placeholder="例：10000m 27:30切り"
-onChange={e => { setGoal(e.target.value); localStorage.setItem('diary_goal', e.target.value); }} />
 </div>
 <div className="form-group">
 <label>練習種目</label>
@@ -426,13 +516,22 @@ return (
 </div>
 <div className="memo-text">{entry.memo||'（メモなし）'}</div>
 <div className="ai-section">
+<div className={`coach-banner ${aiMode}`}>
+<CoachIcon mode={aiMode} size={42} />
+<div>
+<div className="coach-banner-name">{aiMode==='sparta'?'🔥 ':'🌸 '}{COACH_NAME[aiMode]}</div>
+<div className="coach-banner-sub">{COACH_TAG[aiMode]}</div>
+</div>
+</div>
 <button className={`btn-ai ${aiMode}`} disabled={analyzing} onClick={analyze}>
-{analyzing ? <><span className="spinner">⟳</span> 分析中...</> : aiMode==='sparta'?'🔥 スパルタ分析':'🌸 やさしく分析'}
+{analyzing ? <><span className="spinner">⟳</span> 分析中...</> : aiMode==='sparta'?'🔥 鬼軍曹に見てもらう':'🌸 やさしく見てもらう'}
 </button>
 {result && (
-<div>
-<div className={`ai-result ${resultMode}`}>{result}</div>
-<div className="ai-result-meta">{resultMode==='sparta'?'🔥 スパルタ':'🌸 やさしめ'} モードで分析</div>
+<div className={`ai-bubble ${resultMode}`}>
+<CoachIcon mode={resultMode} size={38} />
+<div className="ai-bubble-body">{result}
+<div className="ai-result-meta">{resultMode==='sparta'?'🔥 鬼軍曹':'🌸 やさしめ'} モードで分析</div>
+</div>
 </div>
 )}
 </div>
@@ -479,7 +578,7 @@ return (
 );
 }
 
-function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange, onSave, saving, goal, setGoal, aiAuto, communities, aiMode }) {
+function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange, onSave, saving, goal, setGoal, goalsDone, setGoalsDone, aiAuto, communities, aiMode }) {
 const [selectedDate, setSelectedDate] = useState(null);
 const [form, setForm] = useState(defaultForm());
 const entryMap = {};
@@ -507,6 +606,7 @@ const selectedEntries = selectedDate ? (entryMap[selectedDate] || []) : [];
 const weekDay = selectedDate ? ['日','月','火','水','木','金','土'][new Date(selectedDate).getDay()] : '';
 return (
 <div className="content">
+<GoalManager goal={goal} setGoal={setGoal} goalsDone={goalsDone} setGoalsDone={setGoalsDone} />
 <div className="monthly-stats-bar">
 <div className="monthly-stat"><div className="stat-val">{monthlyKm.toFixed(1)}</div><div className="stat-lbl">km / 月</div></div>
 <div className="monthly-stat"><div className="stat-val">{monthlyDays}</div><div className="stat-lbl">練習日数</div></div>
@@ -653,11 +753,76 @@ onChange={e=>setJoinCode(e.target.value)} onKeyDown={e=>e.key==='Enter'&&joinGro
 );
 }
 
+function GoalManager({ goal, setGoal, goalsDone, setGoalsDone }) {
+const [input, setInput] = useState('');
+const [showHist, setShowHist] = useState(false);
+function setNewGoal() {
+if (!input.trim()) return;
+setGoal(input.trim()); localStorage.setItem('diary_goal', input.trim()); setInput('');
+}
+function achieve() {
+if (!goal) return;
+const done = [{ text: goal, date: todayStr() }, ...goalsDone];
+setGoalsDone(done); saveGoalsDone(done);
+setGoal(''); localStorage.setItem('diary_goal', '');
+}
+function removeGoal() {
+setGoal(''); localStorage.setItem('diary_goal', '');
+}
+function removeDone(i) {
+const done = goalsDone.filter((_, idx) => idx !== i);
+setGoalsDone(done); saveGoalsDone(done);
+}
+return (
+<div className="goal-card">
+<div className="goal-head">🎯 目標</div>
+{goal ? (
+<div className="goal-current">
+<div className="goal-text">{goal}</div>
+<div className="goal-btns">
+<button className="goal-achieve" onClick={achieve}>🏅 達成！</button>
+<button className="goal-del" onClick={removeGoal}>削除</button>
+</div>
+</div>
+) : (
+<div>
+<div className="goal-set-row">
+<input type="text" value={input} placeholder="例：10000m 27:30切り"
+onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && setNewGoal()} />
+<button className="goal-set-btn" disabled={!input.trim()} onClick={setNewGoal}>設定</button>
+</div>
+<div className="goal-empty-hint">目標を決めると、AIコーチがそれに沿って分析してくれるで。</div>
+</div>
+)}
+{goalsDone.length > 0 && (
+<div>
+<button className="goal-done-toggle" onClick={() => setShowHist(s => !s)}>
+{showHist ? '▲' : '▼'} 達成した目標（{goalsDone.length}）
+</button>
+{showHist && (
+<div className="goal-done-list">
+{goalsDone.map((g, i) => (
+<div key={i} className="goal-done-item">
+<span className="goal-done-check">✓</span>
+<span className="goal-done-text">{g.text}</span>
+<span className="goal-done-date">{g.date}</span>
+<button className="goal-done-del" onClick={() => removeDone(i)}>🗑</button>
+</div>
+))}
+</div>
+)}
+</div>
+)}
+</div>
+);
+}
+
 function App({ session }) {
 const [tab, setTab] = useState('calendar');
 const [aiMode, setAiMode] = useState('gentle');
 const [aiAuto, setAiAuto] = useState(localStorage.getItem('diary_aiauto') !== 'off');
 const [goal, setGoal] = useState(localStorage.getItem('diary_goal') || '');
+const [goalsDone, setGoalsDone] = useState(getGoalsDone());
 const [communities, setCommunities] = useState(getMyCommunities());
 const [entries, setEntries] = useState([]);
 const [saving, setSaving] = useState(false);
@@ -737,9 +902,9 @@ return (
 <div className="logo">Run<span>Diary</span></div>
 <div className="header-right">
 <button className={`ai-auto-btn ${aiAuto?'on':''}`} onClick={toggleAiAuto} title="投稿時AI自動分析">🤖 {aiAuto?'ON':'OFF'}</button>
-<div className="mode-toggle">
-<button className={`mode-btn ${aiMode==='sparta'?'active-sparta':''}`} onClick={()=>setAiMode('sparta')}>🔥</button>
-<button className={`mode-btn ${aiMode==='gentle'?'active-gentle':''}`} onClick={()=>setAiMode('gentle')}>🌸</button>
+<div className="coach-toggle">
+<button className={`coach-pick sparta ${aiMode==='sparta'?'active':''}`} onClick={()=>setAiMode('sparta')} title="鬼軍曹コーチ"><CoachIcon mode="sparta" size={30} /></button>
+<button className={`coach-pick gentle ${aiMode==='gentle'?'active':''}`} onClick={()=>setAiMode('gentle')} title="やさしめコーチ"><CoachIcon mode="gentle" size={30} /></button>
 </div>
 <button className="logout-btn" onClick={()=>sb.auth.signOut()}>ログアウト</button>
 </div>
@@ -749,7 +914,7 @@ return (
 <button className={`tab-btn ${tab==='feed'?'active':''}`} onClick={()=>{setTab('feed');loadEntries();}}>📋 日誌</button>
 <button className={`tab-btn ${tab==='group'?'active':''}`} onClick={()=>setTab('group')}>👥 グループ</button>
 </div>
-{tab==='calendar' && <CalendarTab calEntries={calEntries} calLoading={calLoading} calYear={calYear} calMonth={calMonth} onMonthChange={handleMonthChange} onSave={saveEntry} saving={saving} goal={goal} setGoal={setGoal} aiAuto={aiAuto} communities={communities} aiMode={aiMode} />}
+{tab==='calendar' && <CalendarTab calEntries={calEntries} calLoading={calLoading} calYear={calYear} calMonth={calMonth} onMonthChange={handleMonthChange} onSave={saveEntry} saving={saving} goal={goal} setGoal={setGoal} goalsDone={goalsDone} setGoalsDone={setGoalsDone} aiAuto={aiAuto} communities={communities} aiMode={aiMode} />}
 {tab==='feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} goal={goal} onDelete={handleDelete} communities={communities} feedFilter={feedFilter} setFeedFilter={setFeedFilter} />}
 {tab==='group' && <GroupTab communities={communities} setCommunities={setCommunities} />}
 </div>
