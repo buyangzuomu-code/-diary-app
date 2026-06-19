@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RunDiary — チーム練習日誌</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.22.0/babel.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root {
+--bg:#0f0f0f; --surface:#1a1a1a; --surface2:#242424; --border:#2e2e2e;
+--accent:#f97316; --text:#f0f0f0; --muted:#777;
+--green:#4ade80; --yellow:#fbbf24;
+--red-dark:#7f1d1d; --red-light:#fca5a5;
+--blue-dark:#1e3a5f; --blue-light:#93c5fd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Helvetica Neue','Hiragino Sans',sans-serif;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px}
+.logo{font-size:18px;font-weight:800;letter-spacing:-.5px;color:var(--accent);flex-shrink:0}
+.logo span{color:var(--text);font-weight:300}
+.header-right{display:flex;align-items:center;gap:8px}
+.ai-auto-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+.ai-auto-btn.on{background:rgba(74,222,128,.1);border-color:#4ade80;color:#4ade80}
+.mode-toggle{display:flex;background:var(--surface2);border-radius:20px;padding:3px;gap:2px}
+.mode-btn{padding:5px 11px;border-radius:17px;border:none;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;background:transparent;color:var(--muted)}
+.mode-btn.active-sparta{background:var(--red-dark);color:var(--red-light)}
+.mode-btn.active-gentle{background:var(--blue-dark);color:var(--blue-light)}
+.logout-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+.logout-btn:hover{color:#ef4444;border-color:#ef4444}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab-btn{flex:1;padding:12px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid transparent;transition:all .2s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.community-filter{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.cf-btn{padding:4px 12px;border-radius:14px;border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);white-space:nowrap;transition:all .2s}
+.cf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.content{max-width:680px;margin:0 auto;padding:16px}
+/* Form elements */
+.form-group{margin-bottom:14px}
+label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{width:100%;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:90px;font-family:inherit;line-height:1.6}
+select option{background:var(--surface2)}
+input[type="number"]{-moz-appearance:textfield}
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
+.sub-hint{font-size:11px;color:var(--muted);margin-top:5px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu-desc{margin-top:7px;font-size:12px;color:var(--muted);line-height:1.6;padding:7px 11px;background:var(--surface);border-radius:6px;border-left:2px solid var(--accent)}
+.no-group-hint{padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);line-height:1.8}
+/* Stars */
+.stars{display:flex;gap:7px}
+.star{width:34px;height:34px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;color:var(--muted);user-select:none}
+.star.cond{border-color:var(--green);background:rgba(74,222,128,.12);color:var(--green)}
+.star.motiv{border-color:var(--yellow);background:rgba(251,191,36,.12);color:var(--yellow)}
+/* Community picker */
+.community-picker{display:flex;flex-direction:column;gap:6px}
+.cp-option{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+.cp-option:hover{border-color:#444}
+.cp-option.selected{border-color:var(--accent);background:rgba(249,115,22,.07)}
+.cp-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;transition:all .15s}
+.cp-option.selected .cp-radio{background:var(--accent);border-color:var(--accent)}
+.cp-label{font-size:13px;font-weight:600}
+.cp-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.ai-auto-notice{padding:9px 13px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;font-size:12px;color:#4ade80;margin-bottom:12px;text-align:center}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary:hover:not(:disabled){opacity:.88}
+/* Entry cards */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.entry-header{padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s}
+.entry-header:hover{background:var(--surface2)}
+.avatar{width:40px;height:40px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;color:#fff}
+.entry-meta{flex:1;min-width:0}
+.entry-name{font-weight:700;font-size:14px}
+.entry-date-row{font-size:11px;color:var(--muted);margin-top:1px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-menu{background:#1e293b;color:var(--blue-light)}
+.badge-dist{background:rgba(74,222,128,.1);color:var(--green)}
+.badge-time{background:rgba(251,191,36,.1);color:var(--yellow)}
+.badge-ai{background:rgba(74,222,128,.1);color:#4ade80}
+.badge-coach{background:rgba(96,165,250,.1);color:#93c5fd}
+.badge-group{background:rgba(249,115,22,.1);color:var(--accent)}
+.entry-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.btn-delete{padding:4px 7px;background:transparent;border:none;color:#555;cursor:pointer;font-size:14px;border-radius:4px}
+.btn-delete:hover:not(:disabled){color:#ef4444}
+.chevron{color:var(--muted);font-size:11px}
+.entry-body{border-top:1px solid var(--border);padding:13px 15px}
+.score-row{display:flex;gap:18px;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.memo-text{font-size:14px;color:#ccc;line-height:1.75;white-space:pre-wrap;margin-bottom:13px}
+/* AI */
+.ai-section{border-top:1px solid var(--border);padding-top:13px}
+.btn-ai{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .18s}
+.btn-ai.sparta{background:var(--red-dark);color:var(--red-light)}
+.btn-ai.sparta:hover:not(:disabled){background:#991b1b}
+.btn-ai.gentle{background:var(--blue-dark);color:var(--blue-light)}
+.btn-ai.gentle:hover:not(:disabled){background:#1e40af}
+.btn-ai:disabled{opacity:.45;cursor:not-allowed}
+.ai-result{margin-top:11px;padding:13px 15px;border-radius:8px;font-size:13px;line-height:1.85;white-space:pre-wrap}
+.ai-result.sparta{background:#180808;border:1px solid var(--red-dark);color:#fecaca}
+.ai-result.gentle{background:#08101a;border:1px solid var(--blue-dark);color:#bfdbfe}
+.ai-result-meta{font-size:11px;color:var(--muted);margin-top:5px}
+/* Coach */
+.coach-section{margin-top:13px;border-top:1px solid var(--border);padding-top:13px}
+.coach-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.coach-existing{padding:9px 11px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:6px;font-size:13px;color:#93c5fd;line-height:1.7;margin-bottom:8px;white-space:pre-wrap}
+.coach-input{width:100%;padding:9px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;resize:vertical;min-height:65px;font-family:inherit;outline:none}
+.coach-input:focus{border-color:#60a5fa}
+.btn-coach-save{margin-top:7px;padding:6px 15px;background:var(--blue-dark);color:var(--blue-light);border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.btn-coach-save:disabled{opacity:.5;cursor:not-allowed}
+/* Calendar */
+.monthly-stats-bar{display:flex;gap:20px;justify-content:center;padding:14px;background:var(--surface2);border-radius:10px;margin-bottom:12px}
+.monthly-stat{text-align:center}
+.stat-val{font-size:24px;font-weight:800;color:var(--accent)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav-btn{padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:14px}
+.cal-title{font-size:15px;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-header{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:5px 0}
+.cal-header.sun{color:#f87171} .cal-header.sat{color:#60a5fa}
+.cal-cell{min-height:52px;padding:4px;border-radius:6px;background:var(--surface2)}
+.cal-cell.has-entry{background:var(--surface);border:1px solid var(--border);cursor:pointer}
+.cal-cell.has-entry:hover{border-color:#555}
+.cal-cell.selected{border:1px solid var(--accent)!important;background:rgba(249,115,22,.08)}
+.cal-cell.today .cal-day{color:var(--accent);font-weight:800}
+.cal-cell.empty{background:transparent}
+.cal-cell.clickable{cursor:pointer}
+.cal-cell.clickable:hover{border:1px solid #444}
+.cal-day{font-size:12px;font-weight:600}
+.cal-dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:3px}
+.cal-dot{width:6px;height:6px;border-radius:50%}
+.cal-km{font-size:9px;color:var(--muted);margin-top:2px}
+.cal-share{font-size:9px;margin-top:1px;letter-spacing:1px;line-height:1}
+.mini-share{font-size:10px;padding:2px 7px;border-radius:9px;font-weight:700;white-space:nowrap}
+.mini-share.shared{background:rgba(249,115,22,.14);color:var(--accent)}
+.mini-share.private{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.mini-del{background:none;border:none;color:#666;cursor:pointer;font-size:14px;padding:0 2px;margin-left:4px}
+.mini-del:hover{color:#ef4444}
+/* Date panel (write + existing entries) */
+.date-panel{margin-top:14px;background:var(--surface);border:1px solid var(--accent);border-radius:12px;overflow:hidden}
+.date-panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--border)}
+.date-panel-title{font-size:15px;font-weight:700;color:var(--accent)}
+.date-panel-close{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:12px}
+.date-panel-body{padding:14px 15px}
+.day-existing{margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px}
+.day-existing-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.day-mini-entry{display:flex;gap:8px;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:6px;font-size:13px}
+.day-mini-name{font-weight:700}
+.day-mini-menu{color:var(--muted)}
+.day-mini-km{color:var(--green);margin-left:auto;font-size:12px}
+.date-select-hint{text-align:center;color:var(--muted);font-size:13px;padding:20px;margin-top:10px}
+/* Group tab */
+.group-section{margin-bottom:22px}
+.group-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.group-name{font-size:14px;font-weight:700}
+.group-code{font-size:12px;color:var(--muted);margin-top:2px;font-family:monospace;letter-spacing:1px}
+.group-btns{display:flex;gap:6px;flex-shrink:0}
+.btn-copy{padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--muted);cursor:pointer}
+.btn-leave{padding:4px 10px;background:transparent;border:1px solid #3a3a3a;border-radius:5px;font-size:11px;color:#666;cursor:pointer}
+.btn-leave:hover{color:#ef4444;border-color:#ef4444}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1}
+.btn-action{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+.btn-action:disabled{opacity:.5;cursor:not-allowed}
+.btn-action:hover:not(:disabled){opacity:.88}
+.group-empty{color:var(--muted);font-size:13px;padding:12px 0}
+.msg-box{padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2);border-radius:8px;font-size:13px;color:#4ade80;margin-bottom:14px}
+.spinner{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px;line-height:2}
+.section-hint{font-size:12px;color:var(--muted);text-align:center;padding:8px 0 4px}
+/* ===== Auth (login) screen ===== */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 22px}
+.auth-logo{font-size:28px;font-weight:800;color:var(--accent);text-align:center;letter-spacing:-.5px}
+.auth-logo span{color:var(--text);font-weight:300}
+.auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 22px;line-height:1.7}
+.auth-field{margin-bottom:13px}
+.auth-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:opacity .2s}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-btn:hover:not(:disabled){opacity:.88}
+.auth-google{width:100%;padding:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:10px}
+.auth-google:hover{border-color:#555}
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:16px 0}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+.auth-switch{text-align:center;font-size:13px;color:var(--muted);margin-top:16px}
+.auth-switch button{background:none;border:none;color:var(--accent);font-weight:700;cursor:pointer;padding:0}
+.auth-msg{padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.6;margin-bottom:14px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#fdba74}
+/* ===== Vivid + rounded refresh ===== */
+body{background:radial-gradient(1100px 560px at 50% -8%, #1c1510, var(--bg))}
+.btn-primary{background:linear-gradient(135deg,#fb923c,#f97316);box-shadow:0 6px 18px rgba(249,115,22,.30);border-radius:14px}
+.btn-action{background:linear-gradient(135deg,#fb923c,#f97316);border-radius:12px}
+.entry-card{border-radius:18px}
+.group-card{border-radius:16px}
+input,select,textarea{border-radius:12px}
+.badge{border-radius:999px}
+.menu-desc{border-radius:11px}
+.cal-cell{border-radius:11px}
+.monthly-stats-bar{border-radius:18px;background:linear-gradient(135deg,#271c12,#242424)}
+.stat-val{background:linear-gradient(135deg,#fb923c,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tab-btn.active{color:var(--accent)}
+.logo{font-size:19px}
+.tabs{border-radius:0}
+/* coach toggle (header) */
+.coach-toggle{display:flex;gap:5px;background:var(--surface2);padding:4px;border-radius:24px}
+.coach-pick{width:38px;height:38px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:.4;filter:grayscale(.7);transition:all .2s}
+.coach-pick.active{opacity:1;filter:none}
+.coach-pick.sparta.active{border-color:#ef4444;background:rgba(239,68,68,.14)}
+.coach-pick.gentle.active{border-color:#60a5fa;background:rgba(96,165,250,.14)}
+/* coach banner (entry AI section) */
+.coach-banner{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;margin-bottom:11px}
+.coach-banner.sparta{background:linear-gradient(135deg,rgba(239,68,68,.14),rgba(127,29,29,.18));border:1px solid var(--red-dark)}
+.coach-banner.gentle{background:linear-gradient(135deg,rgba(96,165,250,.14),rgba(30,58,95,.18));border:1px solid var(--blue-dark)}
+.coach-banner-name{font-size:14px;font-weight:800}
+.coach-banner.sparta .coach-banner-name{color:#fca5a5}
+.coach-banner.gentle .coach-banner-name{color:#93c5fd}
+.coach-banner-sub{font-size:11px;color:var(--muted)}
+/* ai bubble */
+.ai-bubble{display:flex;gap:10px;margin-top:11px;align-items:flex-start}
+.ai-bubble-body{flex:1;padding:12px 14px;border-radius:14px;border-top-left-radius:3px;font-size:13px;line-height:1.85;white-space:pre-wrap}
+.ai-bubble.sparta .ai-bubble-body{background:#180808;border:1px solid var(--red-dark);color:#fecaca}
+.ai-bubble.gentle .ai-bubble-body{background:#08101a;border:1px solid var(--blue-dark);color:#bfdbfe}
+/* goal card */
+.goal-card{background:linear-gradient(135deg,#271c12,var(--surface));border:1px solid var(--border);border-radius:18px;padding:15px 16px;margin-bottom:14px}
+.goal-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.goal-current{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.goal-text{flex:1;min-width:140px;font-size:17px;font-weight:800}
+.goal-btns{display:flex;gap:7px}
+.goal-achieve{padding:9px 15px;border:none;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#4ade80,#22c55e);color:#06210f}
+.goal-del{padding:9px 13px;border:1px solid #3a3a3a;border-radius:11px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#888}
+.goal-del:hover{color:#ef4444;border-color:#ef4444}
+.goal-set-row{display:flex;gap:8px}
+.goal-set-row input{flex:1}
+.goal-set-btn{padding:10px 16px;border:none;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;white-space:nowrap}
+.goal-set-btn:disabled{opacity:.5;cursor:not-allowed}
+.goal-empty-hint{font-size:11px;color:var(--muted);margin-top:8px}
+.goal-done-toggle{margin-top:12px;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-weight:700;padding:0}
+.goal-done-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.goal-done-item{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--surface2);border-radius:11px;font-size:13px}
+.goal-done-check{color:#4ade80;font-weight:800}
+.goal-done-text{flex:1;text-decoration:line-through;color:#aaa}
+.goal-done-date{font-size:11px;color:var(--muted)}
+.goal-done-del{background:none;border:none;color:#555;cursor:pointer;font-size:13px}
+.goal-done-del:hover{color:#ef4444}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<radialGradient id="oniShade" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#991b1b"/></radialGradient>
+<radialGradient id="genShade" cx="50%" cy="35%" r="70%"><stop offset="0%" stop-color="#fde7cf"/><stop offset="100%" stop-color="#f6cfa0"/></radialGradient>
+<symbol id="oni" viewBox="0 0 100 100">
+<circle cx="50" cy="52" r="38" fill="url(#oniShade)"/>
+<path d="M30 22 Q26 8 36 12 Q33 20 38 26 Z" fill="#f3f4f6"/>
+<path d="M70 22 Q74 8 64 12 Q67 20 62 26 Z" fill="#f3f4f6"/>
+<path d="M18 44 Q20 26 34 24 Q40 30 50 28 Q60 30 66 24 Q80 26 82 44 Q72 36 50 38 Q28 36 18 44Z" fill="#1f2937"/>
+<path d="M28 44 L44 50" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<path d="M72 44 L56 50" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<circle cx="37" cy="55" r="5.5" fill="#fff"/><circle cx="37" cy="56" r="2.8" fill="#111"/>
+<circle cx="63" cy="55" r="5.5" fill="#fff"/><circle cx="63" cy="56" r="2.8" fill="#111"/>
+<path d="M36 70 Q50 64 64 70 Q50 82 36 70Z" fill="#3b0a0a"/>
+<path d="M36 70 Q50 67 64 70" stroke="#fff" stroke-width="2.5" fill="none"/>
+<path d="M44 67 L44 75 M50 66 L50 76 M56 67 L56 75" stroke="#fff" stroke-width="1.6"/>
+<path d="M70 36 q4 0 4 4 q0 -4 4 -4 q-4 0 -4 -4 q0 4 -4 4Z" fill="#fca5a5"/>
+</symbol>
+<symbol id="gentle" viewBox="0 0 100 100">
+<circle cx="50" cy="52" r="38" fill="url(#genShade)"/>
+<path d="M16 46 Q18 24 38 22 Q44 26 50 25 Q56 26 62 22 Q82 24 84 46 Q74 34 50 36 Q26 34 16 46Z" fill="#5b3b1f"/>
+<path d="M30 46 Q37 43 44 46" stroke="#7c5a36" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M56 46 Q63 43 70 46" stroke="#7c5a36" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M32 56 Q38 50 44 56" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+<path d="M56 56 Q62 50 68 56" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+<circle cx="32" cy="64" r="5" fill="#f9a8a8" opacity=".55"/>
+<circle cx="68" cy="64" r="5" fill="#f9a8a8" opacity=".55"/>
+<path d="M38 66 Q50 78 62 66" stroke="#3b2a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</symbol>
+</defs>
+</svg>
+<div id="root"></div>
+<script type="text/babel">
+/** @jsxRuntime classic */
+const { useState, useEffect } = React;
+const SUPABASE_URL = 'https://rndewdcuvewyalxvfoqi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_pqSIdB7XK7-Dltr_AVBhLQ_yrOhwNSN';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+
+const MENU_TYPES = ['ジョグ','ペース走','インターバル','閾値走','ロング走','レース','クロカン','補強・筋トレ','オフ','その他'];
+const MENU_ICONS = {'ジョグ':'🏃','ペース走':'⚡','インターバル':'🔁','閾値走':'💨','ロング走':'🛤️','レース':'🏆','クロカン':'🌲','補強・筋トレ':'💪','オフ':'🛋️','その他':'📋'};
+const MENU_DESC = {
+'ジョグ': '会話できる強度（最大心拍65〜75%）で有酸素基盤を積み上げる基本練習',
+'ペース走': '目標レースペース±5秒/kmで20〜40分継続。LT向上に効果的',
+'インターバル': '高強度（vVO2max相当）×短休憩を反復。速筋・心肺機能の強化',
+'閾値走': 'LT（乳酸性作業閾値）ペースで20〜30分。長距離のランニングエコノミー向上',
+'ロング走': '最大心拍70%以下で90〜150分。脂質代謝・毛細血管密度の向上',
+'レース': '公式または非公式の競技。フォーム・レースマネジメントの確認',
+'クロカン': '不整地走で固有感覚・臀部・体幹を総合強化。怪我予防にも有効',
+'補強・筋トレ': 'コア・股関節・体幹の強化。ランニングフォームの安定に直結',
+'オフ': '積極的休養日。筋の超回復を促し翌日の練習の質を高める',
+'その他': '指定なしの練習やウォームアップ・クールダウン等',
+};
+const MENU_COLOR = {'ジョグ':'#60a5fa','ペース走':'#f97316','インターバル':'#ef4444','閾値走':'#f59e0b','ロング走':'#10b981','レース':'#a855f7','クロカン':'#84cc16','補強・筋トレ':'#06b6d4','オフ':'#6b7280','その他':'#9ca3af'};
+const DAY_NAMES = ['日','月','火','水','木','金','土'];
+
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function getMyCommunities() { try { return JSON.parse(localStorage.getItem('diary_communities') || '[]'); } catch { return []; } }
+function saveMyCommunities(cs) { localStorage.setItem('diary_communities', JSON.stringify(cs)); }
+function getGoalsDone() { try { return JSON.parse(localStorage.getItem('diary_goals_done') || '[]'); } catch { return []; } }
+function saveGoalsDone(g) { localStorage.setItem('diary_goals_done', JSON.stringify(g)); }
+function generateCode() {
+const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+function defaultForm() {
+return { entry_date: todayStr(), user_name: localStorage.getItem('diary_name')||'', menu_type:'ジョグ', distance_km:'', time_min:'', condition_score:3, motivation_score:3, memo:'', community_id:null };
+}
+async function callAI(prompt) {
+const res = await fetch('/v1/messages', {
+method:'POST', headers:{'Content-Type':'application/json'},
+body: JSON.stringify({ model:'gemini-2.5-flash', max_tokens:900, messages:[{role:'user',content:prompt}] }),
+});
+if (!res.ok) throw new Error(`HTTP ${res.status}`);
+const data = await res.json();
+return data.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+}
+function buildPrompt(entry, mode, goal) {
+const dist = entry.distance_km ? `${entry.distance_km}km` : '未記録';
+const time = entry.time_min ? `${entry.time_min}分` : '未記録';
+const pace = (entry.distance_km && entry.time_min)
+? (() => { const s=Math.round(entry.time_min/entry.distance_km*60); return `${Math.floor(s/60)}'${String(s%60).padStart(2,'0')}"／km`; })() : null;
+const cond = entry.condition_score || 3;
+const motiv = entry.motivation_score || 3;
+const memo = entry.memo || '（なし）';
+const goalLine = goal ? `目標: ${goal}` : '目標: 未設定';
+const paceInfo = pace ? ` 平均ペース: ${pace}` : '';
+if (mode === 'sparta') {
+return `あなたはJack Danielsのランニングフォーミュラを熟知し、箱根駅伝・実業団で指導実績を持つ厳格なコーチです。生理学・トレーニング理論に基づき、選手の練習日誌を容赦なく分析してください。
+【選手データ】
+名前: ${entry.user_name}
+${goalLine}
+日付: ${entry.entry_date}
+練習種別: ${entry.menu_type}
+距離/時間: ${dist} / ${time}${paceInfo}
+体調: ${cond}/5 モチベーション: ${motiv}/5
+本人コメント: 「${memo}」
+以下を専門的・具体的に厳しく回答：
+【練習の質評価】VO2max強度・LTペース・運動強度ゾーンの観点で数値根拠を交えて評価
+【目標との整合性】目標達成に向け今日の練習の適切さ、不足点・過剰点を明確に指摘
+【問題点と改善指示】ペース配分・距離・本数・レスト等について具体的数値を挙げて指摘
+【次回の練習処方】目標に向けた具体的な練習内容（種別・距離・ペース・本数等）を処方
+【一言】甘えを許さない、魂に響く激励`;
+} else {
+return `あなたはスポーツ科学と選手心理に精通した、選手に寄り添う優しいランニングコーチです。科学的根拠を大切にしながら選手が前向きに練習に臨めるようサポートしてください。
+【選手データ】
+名前: ${entry.user_name}
+${goalLine}
+日付: ${entry.entry_date}
+練習種別: ${entry.menu_type}
+距離/時間: ${dist} / ${time}${paceInfo}
+体調: ${cond}/5 モチベーション: ${motiv}/5
+本人コメント: 「${memo}」
+以下を温かく・専門的に回答：
+【今日の練習の振り返り】体調・強度・種別を踏まえ今日の取り組みを肯定的に総括
+【目標に向かっている点】今日の練習が目標達成にどう貢献しているかを具体的に
+【体のケアとリカバリー】今日の練習量・強度に応じた回復アドバイス（栄養・睡眠・ストレッチ等）
+【次回のアドバイス】無理なく続けられる、目標に向けた具体的な練習提案
+【応援メッセージ】前向きになれる温かい一言`;
+}
+}
+
+function CoachIcon({ mode, size = 32 }) {
+return (<svg width={size} height={size} viewBox="0 0 100 100"><use href={mode === 'sparta' ? '#oni' : '#gentle'} /></svg>);
+}
+const COACH_NAME = { sparta: '鬼軍曹コーチ', gentle: 'やさしめコーチ' };
+const COACH_TAG = { sparta: '容赦なく喝を入れる', gentle: 'そっと寄り添う' };
+
+function Stars({ value, onChange, type }) {
+return (
+<div className="stars">
+{[1,2,3,4,5].map(n => (
+<div key={n} className={`star ${value >= n ? type : ''}`} onClick={() => onChange(n)}>{n}</div>
+))}
+</div>
+);
+}
+
+function WriteForm({ form, setForm, saving, onSave, goal, setGoal, aiAuto, communities }) {
+const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+const canSave = form.user_name.trim() && form.memo.trim();
+return (
+<div>
+<div className="form-group">
+<label>名前</label>
+<input type="text" value={form.user_name} placeholder="例：佐藤 大地"
+onChange={e => { set('user_name', e.target.value); localStorage.setItem('diary_name', e.target.value); }} />
+</div>
+<div className="form-group">
+<label>練習種目</label>
+<select value={form.menu_type} onChange={e => set('menu_type', e.target.value)}>
+{MENU_TYPES.map(m => <option key={m} value={m}>{MENU_ICONS[m]} {m}</option>)}
+</select>
+<div className="menu-desc">{MENU_DESC[form.menu_type]}</div>
+</div>
+<div className="row-2">
+<div className="form-group">
+<label>距離 (km)</label>
+<input type="number" value={form.distance_km} placeholder="例：15" step="0.1" onChange={e => set('distance_km', e.target.value)} />
+</div>
+<div className="form-group">
+<label>時間 (分)</label>
+<input type="number" value={form.time_min} placeholder="例：75" onChange={e => set('time_min', e.target.value)} />
+</div>
+</div>
+<div className="form-group">
+<label>体調 ({form.condition_score}/5)</label>
+<Stars value={form.condition_score} onChange={v => set('condition_score', v)} type="cond" />
+</div>
+<div className="form-group">
+<label>モチベーション ({form.motivation_score}/5)</label>
+<Stars value={form.motivation_score} onChange={v => set('motivation_score', v)} type="motiv" />
+</div>
+<div className="form-group">
+<label>練習メモ</label>
+<textarea value={form.memo} rows={4} placeholder={`今日の練習を記録。\nペース・体の感覚・気づきなど。`}
+onChange={e => set('memo', e.target.value)} />
+</div>
+<div className="form-group">
+<label>📢 共有先</label>
+{communities.length === 0 ? (
+<div className="no-group-hint">グループ未参加。「👥 グループ」タブで参加・作成するとチームと共有できます。</div>
+) : (
+<div className="community-picker">
+{communities.map(c => (
+<div key={c.id} className={`cp-option ${form.community_id === c.id ? 'selected' : ''}`} onClick={() => set('community_id', c.id)}>
+<div className="cp-radio" />
+<div><div className="cp-label">👥 {c.name}</div><div className="cp-sub">このグループに共有</div></div>
+</div>
+))}
+<div className={`cp-option ${form.community_id === null ? 'selected' : ''}`} onClick={() => set('community_id', null)}>
+<div className="cp-radio" />
+<div><div className="cp-label">🔒 自分のみ</div><div className="cp-sub">グループには表示しない</div></div>
+</div>
+</div>
+)}
+</div>
+{aiAuto && <div className="ai-auto-notice">🤖 投稿後にAI分析が自動で実行されます</div>}
+<button className="btn-primary" disabled={!canSave || saving} onClick={onSave}>
+{saving ? (aiAuto ? '⟳ AI分析中...' : '投稿中...') : '📝 日誌を投稿する'}
+</button>
+</div>
+);
+}
+
+function EntryCard({ entry, aiMode, goal, onDelete, communities }) {
+const [open, setOpen] = useState(false);
+const [result, setResult] = useState(entry.ai_feedback || '');
+const [resultMode, setResultMode] = useState(entry.ai_mode || '');
+const [analyzing, setAnalyzing] = useState(false);
+const [coachText, setCoachText] = useState(entry.coach_comment || '');
+const [coachSaving, setCoachSaving] = useState(false);
+const [coachSaved, setCoachSaved] = useState(false);
+const [deleting, setDeleting] = useState(false);
+const initials = entry.user_name ? entry.user_name.charAt(0) : '?';
+const dist = entry.distance_km ? `${entry.distance_km}km` : null;
+const time = entry.time_min ? `${entry.time_min}分` : null;
+const condStars = '★'.repeat(entry.condition_score||0)+'☆'.repeat(5-(entry.condition_score||0));
+const motivStars = '★'.repeat(entry.motivation_score||0)+'☆'.repeat(5-(entry.motivation_score||0));
+const dotColor = MENU_COLOR[entry.menu_type] || 'var(--accent)';
+const groupName = entry.community_id ? (communities.find(c=>c.id===entry.community_id)||{}).name : null;
+async function analyze() {
+setAnalyzing(true); setResult('');
+try {
+const text = await callAI(buildPrompt(entry, aiMode, goal));
+setResult(text); setResultMode(aiMode);
+await sb.from('diary_entries').update({ai_feedback:text, ai_mode:aiMode}).eq('id', entry.id);
+} catch(e) { setResult('エラー: '+e.message); setResultMode(aiMode); }
+setAnalyzing(false);
+}
+async function saveCoach() {
+setCoachSaving(true);
+await sb.from('diary_entries').update({coach_comment:coachText}).eq('id', entry.id);
+setCoachSaving(false); setCoachSaved(true);
+setTimeout(()=>setCoachSaved(false), 2000);
+}
+async function handleDelete() {
+if (!window.confirm(`${entry.user_name} の日誌 (${entry.entry_date}) を削除しますか？`)) return;
+setDeleting(true);
+await sb.from('diary_entries').delete().eq('id', entry.id);
+onDelete(entry.id);
+}
+return (
+<div className="entry-card">
+<div className="entry-header" onClick={() => setOpen(o=>!o)}>
+<div className="avatar" style={{background:dotColor}}>{initials}</div>
+<div className="entry-meta">
+<div className="entry-name">{entry.user_name}</div>
+<div className="entry-date-row">{entry.entry_date}</div>
+<div className="badges">
+<span className="badge badge-menu">{MENU_ICONS[entry.menu_type]||'🏃'} {entry.menu_type}</span>
+{dist && <span className="badge badge-dist">{dist}</span>}
+{time && <span className="badge badge-time">{time}</span>}
+{groupName && <span className="badge badge-group">👥 {groupName}</span>}
+{entry.ai_feedback && <span className="badge badge-ai">🤖 AI済</span>}
+{entry.coach_comment && <span className="badge badge-coach">📋 監督</span>}
+</div>
+</div>
+<div className="entry-actions">
+<button className="btn-delete" disabled={deleting} onClick={e=>{e.stopPropagation();handleDelete();}}>🗑️</button>
+<div className="chevron">{open?'▲':'▼'}</div>
+</div>
+</div>
+{open && (
+<div className="entry-body">
+<div className="score-row">
+<span>体調 <span style={{color:'var(--green)'}}>{condStars}</span></span>
+<span>モチベ <span style={{color:'var(--yellow)'}}>{motivStars}</span></span>
+</div>
+<div className="memo-text">{entry.memo||'（メモなし）'}</div>
+<div className="ai-section">
+<div className={`coach-banner ${aiMode}`}>
+<CoachIcon mode={aiMode} size={42} />
+<div>
+<div className="coach-banner-name">{aiMode==='sparta'?'🔥 ':'🌸 '}{COACH_NAME[aiMode]}</div>
+<div className="coach-banner-sub">{COACH_TAG[aiMode]}</div>
+</div>
+</div>
+<button className={`btn-ai ${aiMode}`} disabled={analyzing} onClick={analyze}>
+{analyzing ? <><span className="spinner">⟳</span> 分析中...</> : aiMode==='sparta'?'🔥 鬼軍曹に見てもらう':'🌸 やさしく見てもらう'}
+</button>
+{result && (
+<div className={`ai-bubble ${resultMode}`}>
+<CoachIcon mode={resultMode} size={38} />
+<div className="ai-bubble-body">{result}
+<div className="ai-result-meta">{resultMode==='sparta'?'🔥 鬼軍曹':'🌸 やさしめ'} モードで分析</div>
+</div>
+</div>
+)}
+</div>
+<div className="coach-section">
+<div className="coach-label">📋 監督コメント</div>
+{entry.coach_comment && <div className="coach-existing">{entry.coach_comment}</div>}
+<textarea className="coach-input" placeholder="コーチ・監督からのコメント..."
+value={coachText} rows={3} onChange={e=>setCoachText(e.target.value)} />
+<button className="btn-coach-save" disabled={coachSaving||!coachText.trim()} onClick={saveCoach}>
+{coachSaved?'✅ 保存しました':coachSaving?'保存中...':'コメントを保存'}
+</button>
+</div>
+</div>
+)}
+</div>
+);
+}
+
+function FeedTab({ entries, loading, aiMode, goal, onDelete, communities, feedFilter, setFeedFilter }) {
+if (communities.length === 0) {
+return <div className="empty-state">グループに参加すると<br />チームの日誌が見られます<br /><br />👥 グループタブから参加・作成</div>;
+}
+const filtered = feedFilter === 'all' ? entries : entries.filter(e => e.community_id === feedFilter);
+return (
+<div>
+{communities.length > 1 && (
+<div className="community-filter">
+<button className={`cf-btn ${feedFilter==='all'?'active':''}`} onClick={() => setFeedFilter('all')}>すべて</button>
+{communities.map(c => (
+<button key={c.id} className={`cf-btn ${feedFilter===c.id?'active':''}`} onClick={() => setFeedFilter(c.id)}>👥 {c.name}</button>
+))}
+</div>
+)}
+{loading ? <div className="empty-state">⏳ 読み込み中...</div>
+: !filtered.length ? <div className="empty-state">まだ日誌がありません<br />最初の一件を書いてみよう！</div>
+: (
+<div className="content">
+<div className="section-hint">クリックで展開 → AI分析・監督コメント</div>
+<div style={{height:10}} />
+{filtered.map(e => <EntryCard key={e.id} entry={e} aiMode={aiMode} goal={goal} onDelete={onDelete} communities={communities} />)}
+</div>
+)}
+</div>
+);
+}
+
+function CalendarTab({ calEntries, calLoading, calYear, calMonth, onMonthChange, onSave, saving, goal, setGoal, goalsDone, setGoalsDone, aiAuto, communities, aiMode, myId, onDelete }) {
+const [selectedDate, setSelectedDate] = useState(null);
+const [form, setForm] = useState(defaultForm());
+async function deleteMini(e) {
+if (!window.confirm(`${e.entry_date} の「${e.menu_type}」を削除しますか？`)) return;
+const { error } = await sb.from('diary_entries').delete().eq('id', e.id);
+if (error) { alert('削除に失敗しました: ' + error.message); return; }
+onDelete(e.id);
+}
+const entryMap = {};
+calEntries.forEach(e => { if (!entryMap[e.entry_date]) entryMap[e.entry_date] = []; entryMap[e.entry_date].push(e); });
+const monthlyKm = calEntries.filter(e=>e.distance_km).reduce((s,e)=>s+parseFloat(e.distance_km),0);
+const monthlyDays = Object.keys(entryMap).filter(d=>entryMap[d].some(e=>e.menu_type!=='オフ')).length;
+const firstDay = new Date(calYear, calMonth, 1).getDay();
+const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+const cells = [];
+for (let i=0; i<firstDay; i++) cells.push(null);
+for (let d=1; d<=daysInMonth; d++) cells.push(d);
+function selectDate(dateStr) {
+if (selectedDate === dateStr) { setSelectedDate(null); return; }
+setSelectedDate(dateStr);
+setForm(f => ({ ...f, entry_date: dateStr }));
+}
+async function handleSave() {
+const ok = await onSave(form);
+if (ok) {
+setSelectedDate(null);
+setForm(defaultForm());
+}
+}
+const selectedEntries = selectedDate ? (entryMap[selectedDate] || []) : [];
+const weekDay = selectedDate ? ['日','月','火','水','木','金','土'][new Date(selectedDate).getDay()] : '';
+return (
+<div className="content">
+<GoalManager goal={goal} setGoal={setGoal} goalsDone={goalsDone} setGoalsDone={setGoalsDone} />
+<div className="monthly-stats-bar">
+<div className="monthly-stat"><div className="stat-val">{monthlyKm.toFixed(1)}</div><div className="stat-lbl">km / 月</div></div>
+<div className="monthly-stat"><div className="stat-val">{monthlyDays}</div><div className="stat-lbl">練習日数</div></div>
+</div>
+<div className="cal-nav">
+<button className="cal-nav-btn" onClick={() => onMonthChange(-1)}>◀</button>
+<span className="cal-title">{calYear}年 {calMonth+1}月</span>
+<button className="cal-nav-btn" onClick={() => onMonthChange(1)}>▶</button>
+</div>
+{calLoading ? <div className="empty-state">⏳</div> : (
+<div className="cal-grid">
+{DAY_NAMES.map(d => <div key={d} className={`cal-header ${d==='日'?'sun':d==='土'?'sat':''}`}>{d}</div>)}
+{cells.map((day, i) => {
+if (!day) return <div key={`e${i}`} className="cal-cell empty" />;
+const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+const de = entryMap[ds] || [];
+const km = de.reduce((s,e)=>s+(parseFloat(e.distance_km)||0),0);
+const hasPrivate = de.some(e=>!e.community_id);
+const hasShared = de.some(e=>e.community_id);
+const isSelected = selectedDate === ds;
+const isToday = ds === todayStr();
+return (
+<div key={ds}
+className={`cal-cell ${de.length?'has-entry':'clickable'} ${isSelected?'selected':''} ${isToday?'today':''}`}
+onClick={() => selectDate(ds)}>
+<div className="cal-day">{day}</div>
+<div className="cal-dots">
+{de.slice(0,3).map((e,idx) => <div key={idx} className="cal-dot" style={{background:MENU_COLOR[e.menu_type]||'var(--accent)'}} />)}
+</div>
+{km>0 && <div className="cal-km">{km.toFixed(0)}km</div>}
+{de.length>0 && <div className="cal-share">{hasPrivate?'🔒':''}{hasShared?'👥':''}</div>}
+</div>
+);
+})}
+</div>
+)}
+{selectedDate ? (
+<div className="date-panel">
+<div className="date-panel-header">
+<span className="date-panel-title">📅 {selectedDate} ({weekDay})</span>
+<button className="date-panel-close" onClick={() => setSelectedDate(null)}>✕ 閉じる</button>
+</div>
+<div className="date-panel-body">
+{selectedEntries.length > 0 && (
+<div className="day-existing">
+<div className="day-existing-title">この日の記録</div>
+{selectedEntries.map(e => (
+<div key={e.id} className="day-mini-entry">
+<span className="day-mini-name">{e.user_name}</span>
+<span className="day-mini-menu">{MENU_ICONS[e.menu_type]} {e.menu_type}</span>
+<span className={`mini-share ${e.community_id?'shared':'private'}`}>{e.community_id?'👥 共有':'🔒 自分のみ'}</span>
+{e.distance_km && <span className="day-mini-km">{e.distance_km}km</span>}
+{e.ai_feedback && <span className="badge badge-ai" style={{marginLeft:4}}>🤖</span>}
+{e.user_id===myId && <button className="mini-del" onClick={()=>deleteMini(e)} title="削除">🗑️</button>}
+</div>
+))}
+</div>
+)}
+<WriteForm form={form} setForm={setForm} saving={saving} onSave={handleSave}
+goal={goal} setGoal={setGoal} aiAuto={aiAuto} communities={communities} />
+</div>
+</div>
+) : (
+<div className="date-select-hint">📅 日付をタップして日誌を書く</div>
+)}
+</div>
+);
+}
+
+function GroupTab({ communities, setCommunities }) {
+const [createName, setCreateName] = useState('');
+const [joinCode, setJoinCode] = useState('');
+const [creating, setCreating] = useState(false);
+const [joining, setJoining] = useState(false);
+const [msg, setMsg] = useState('');
+function showMsg(m) { setMsg(m); setTimeout(()=>setMsg(''), 3000); }
+async function createGroup() {
+if (!createName.trim()) return;
+setCreating(true);
+let code = generateCode(), attempts = 0;
+while (attempts < 5) {
+const { data } = await sb.from('communities').select('id').eq('invite_code', code);
+if (!data || data.length===0) break;
+code = generateCode(); attempts++;
+}
+const { data, error } = await sb.from('communities').insert([{name:createName.trim(), invite_code:code}]).select().single();
+if (!error && data) {
+const updated = [...communities, data];
+setCommunities(updated); saveMyCommunities(updated);
+setCreateName('');
+showMsg(`作成しました！招待コード: ${code}`);
+} else {
+showMsg('作成失敗: ' + (error?.message || 'SQLが未実行の可能性があります'));
+}
+setCreating(false);
+}
+async function joinGroup() {
+const code = joinCode.trim().toUpperCase();
+if (code.length!==6) return;
+if (communities.some(c=>c.invite_code===code)) { showMsg('すでに参加しています'); return; }
+setJoining(true);
+const { data, error } = await sb.from('communities').select('*').eq('invite_code', code).single();
+if (!error && data) {
+const updated = [...communities, data];
+setCommunities(updated); saveMyCommunities(updated);
+setJoinCode(''); showMsg(`「${data.name}」に参加しました！`);
+} else { showMsg('コードが見つかりません'); }
+setJoining(false);
+}
+function leaveGroup(id) {
+const updated = communities.filter(c=>c.id!==id);
+setCommunities(updated); saveMyCommunities(updated);
+}
+function copyCode(code) { navigator.clipboard.writeText(code).then(()=>showMsg('コードをコピーしました')); }
+return (
+<div className="content">
+{msg && <div className="msg-box">{msg}</div>}
+<div className="group-section">
+<div className="group-section-title">参加中のグループ</div>
+{communities.length===0 && <div className="group-empty">グループ未参加。下から作成 or 参加してください。</div>}
+{communities.map(c => (
+<div key={c.id} className="group-card">
+<div><div className="group-name">👥 {c.name}</div><div className="group-code">コード: {c.invite_code}</div></div>
+<div className="group-btns">
+<button className="btn-copy" onClick={()=>copyCode(c.invite_code)}>コピー</button>
+<button className="btn-leave" onClick={()=>leaveGroup(c.id)}>退出</button>
+</div>
+</div>
+))}
+</div>
+<div className="group-section">
+<div className="group-section-title">グループを作成</div>
+<div className="input-row">
+<input type="text" value={createName} placeholder="グループ名（例：駅伝部A組）"
+onChange={e=>setCreateName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&createGroup()} />
+<button className="btn-action" disabled={!createName.trim()||creating} onClick={createGroup}>作成</button>
+</div>
+</div>
+<div className="group-section">
+<div className="group-section-title">コードで参加</div>
+<div className="input-row">
+<input type="text" value={joinCode} placeholder="6桁のコード" maxLength={6}
+style={{textTransform:'uppercase',letterSpacing:'2px'}}
+onChange={e=>setJoinCode(e.target.value)} onKeyDown={e=>e.key==='Enter'&&joinGroup()} />
+<button className="btn-action" disabled={joinCode.trim().length!==6||joining} onClick={joinGroup}>参加</button>
+</div>
+</div>
+</div>
+);
+}
+
+function GoalManager({ goal, setGoal, goalsDone, setGoalsDone }) {
+const [input, setInput] = useState('');
+const [showHist, setShowHist] = useState(false);
+function setNewGoal() {
+if (!input.trim()) return;
+setGoal(input.trim()); localStorage.setItem('diary_goal', input.trim()); setInput('');
+}
+function achieve() {
+if (!goal) return;
+const done = [{ text: goal, date: todayStr() }, ...goalsDone];
+setGoalsDone(done); saveGoalsDone(done);
+setGoal(''); localStorage.setItem('diary_goal', '');
+}
+function removeGoal() {
+setGoal(''); localStorage.setItem('diary_goal', '');
+}
+function removeDone(i) {
+const done = goalsDone.filter((_, idx) => idx !== i);
+setGoalsDone(done); saveGoalsDone(done);
+}
+return (
+<div className="goal-card">
+<div className="goal-head">🎯 目標</div>
+{goal ? (
+<div className="goal-current">
+<div className="goal-text">{goal}</div>
+<div className="goal-btns">
+<button className="goal-achieve" onClick={achieve}>🏅 達成！</button>
+<button className="goal-del" onClick={removeGoal}>削除</button>
+</div>
+</div>
+) : (
+<div>
+<div className="goal-set-row">
+<input type="text" value={input} placeholder="例：10000m 27:30切り"
+onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && setNewGoal()} />
+<button className="goal-set-btn" disabled={!input.trim()} onClick={setNewGoal}>設定</button>
+</div>
+<div className="goal-empty-hint">目標を決めると、AIコーチがそれに沿って分析してくれるで。</div>
+</div>
+)}
+{goalsDone.length > 0 && (
+<div>
+<button className="goal-done-toggle" onClick={() => setShowHist(s => !s)}>
+{showHist ? '▲' : '▼'} 達成した目標（{goalsDone.length}）
+</button>
+{showHist && (
+<div className="goal-done-list">
+{goalsDone.map((g, i) => (
+<div key={i} className="goal-done-item">
+<span className="goal-done-check">✓</span>
+<span className="goal-done-text">{g.text}</span>
+<span className="goal-done-date">{g.date}</span>
+<button className="goal-done-del" onClick={() => removeDone(i)}>🗑</button>
+</div>
+))}
+</div>
+)}
+</div>
+)}
+</div>
+);
+}
+
+function App({ session }) {
+const [tab, setTab] = useState('calendar');
+const [aiMode, setAiMode] = useState('gentle');
+const [aiAuto, setAiAuto] = useState(localStorage.getItem('diary_aiauto') !== 'off');
+const [goal, setGoal] = useState(localStorage.getItem('diary_goal') || '');
+const [goalsDone, setGoalsDone] = useState(getGoalsDone());
+const [communities, setCommunities] = useState(getMyCommunities());
+const [entries, setEntries] = useState([]);
+const [saving, setSaving] = useState(false);
+const [feedLoading, setFeedLoading] = useState(false);
+const [feedFilter, setFeedFilter] = useState('all');
+const [calYear, setCalYear] = useState(new Date().getFullYear());
+const [calMonth, setCalMonth] = useState(new Date().getMonth());
+const [calEntries, setCalEntries] = useState([]);
+const [calLoading, setCalLoading] = useState(false);
+
+// ログインユーザーの表示名を初期セット（名前未設定のときだけ）
+useEffect(() => {
+const nm = (session.user.user_metadata && session.user.user_metadata.display_name)
+|| (session.user.email ? session.user.email.split('@')[0] : '');
+if (nm && !localStorage.getItem('diary_name')) localStorage.setItem('diary_name', nm);
+}, []);
+
+useEffect(() => { loadEntries(); }, [communities]);
+useEffect(() => { loadCalEntries(calYear, calMonth); }, [calYear, calMonth, communities]);
+async function loadEntries() {
+const ids = communities.map(c=>c.id);
+if (!ids.length) { setEntries([]); return; }
+setFeedLoading(true);
+const { data } = await sb.from('diary_entries').select('*')
+.in('community_id', ids).order('entry_date',{ascending:false}).order('created_at',{ascending:false}).limit(60);
+setEntries(data||[]);
+setFeedLoading(false);
+}
+async function loadCalEntries(year, month) {
+const ids = communities.map(c=>c.id);
+setCalLoading(true);
+const from = `${year}-${String(month+1).padStart(2,'0')}-01`;
+const to = `${year}-${String(month+1).padStart(2,'0')}-${String(new Date(year,month+1,0).getDate()).padStart(2,'0')}`;
+let q = sb.from('diary_entries').select('*').gte('entry_date',from).lte('entry_date',to);
+if (ids.length) {
+q = q.or(`user_id.eq.${session.user.id},community_id.in.(${ids.join(',')})`);
+} else {
+q = q.eq('user_id', session.user.id);
+}
+const { data, error } = await q;
+if (error) { console.error(error); }
+setCalEntries(data||[]);
+setCalLoading(false);
+}
+async function saveEntry(form) {
+setSaving(true);
+const payload = {
+user_id: session.user.id,
+entry_date: form.entry_date, user_name: form.user_name.trim(), menu_type: form.menu_type,
+distance_km: form.distance_km ? parseFloat(form.distance_km) : null,
+time_min: form.time_min ? parseFloat(form.time_min) : null,
+condition_score: form.condition_score, motivation_score: form.motivation_score,
+memo: form.memo.trim(), community_id: form.community_id||null,
+};
+const { data, error } = await sb.from('diary_entries').insert([payload]).select();
+if (!error) {
+if (aiAuto && data && data[0]) {
+try {
+const aiText = await callAI(buildPrompt(data[0], aiMode, goal));
+await sb.from('diary_entries').update({ai_feedback:aiText, ai_mode:aiMode}).eq('id', data[0].id);
+} catch(e) { /* AI失敗でも投稿は維持 */ }
+}
+await loadEntries();
+await loadCalEntries(calYear, calMonth);
+setSaving(false);
+return true;
+} else {
+alert('保存に失敗しました: ' + error.message);
+setSaving(false);
+return false;
+}
+}
+function toggleAiAuto() { const n=!aiAuto; setAiAuto(n); localStorage.setItem('diary_aiauto',n?'on':'off'); }
+function handleDelete(id) { setEntries(es=>es.filter(e=>e.id!==id)); setCalEntries(es=>es.filter(e=>e.id!==id)); }
+function handleMonthChange(d) {
+let m=calMonth+d, y=calYear;
+if(m<0){m=11;y--;} if(m>11){m=0;y++;}
+setCalMonth(m); setCalYear(y);
+}
+return (
+<div>
+<div className="header">
+<div className="logo">Run<span>Diary</span></div>
+<div className="header-right">
+<button className={`ai-auto-btn ${aiAuto?'on':''}`} onClick={toggleAiAuto} title="投稿時AI自動分析">🤖 {aiAuto?'ON':'OFF'}</button>
+<div className="coach-toggle">
+<button className={`coach-pick sparta ${aiMode==='sparta'?'active':''}`} onClick={()=>setAiMode('sparta')} title="鬼軍曹コーチ"><CoachIcon mode="sparta" size={30} /></button>
+<button className={`coach-pick gentle ${aiMode==='gentle'?'active':''}`} onClick={()=>setAiMode('gentle')} title="やさしめコーチ"><CoachIcon mode="gentle" size={30} /></button>
+</div>
+<button className="logout-btn" onClick={()=>sb.auth.signOut()}>ログアウト</button>
+</div>
+</div>
+<div className="tabs">
+<button className={`tab-btn ${tab==='calendar'?'active':''}`} onClick={()=>setTab('calendar')}>📅 カレンダー</button>
+<button className={`tab-btn ${tab==='feed'?'active':''}`} onClick={()=>{setTab('feed');loadEntries();}}>📋 日誌</button>
+<button className={`tab-btn ${tab==='group'?'active':''}`} onClick={()=>setTab('group')}>👥 グループ</button>
+</div>
+{tab==='calendar' && <CalendarTab calEntries={calEntries} calLoading={calLoading} calYear={calYear} calMonth={calMonth} onMonthChange={handleMonthChange} onSave={saveEntry} saving={saving} goal={goal} setGoal={setGoal} goalsDone={goalsDone} setGoalsDone={setGoalsDone} aiAuto={aiAuto} communities={communities} aiMode={aiMode} myId={session.user.id} onDelete={handleDelete} />}
+{tab==='feed' && <FeedTab entries={entries} loading={feedLoading} aiMode={aiMode} goal={goal} onDelete={handleDelete} communities={communities} feedFilter={feedFilter} setFeedFilter={setFeedFilter} />}
+{tab==='group' && <GroupTab communities={communities} setCommunities={setCommunities} />}
+</div>
+);
+}
+
+function AuthScreen() {
+const [mode, setMode] = useState('signin');
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [name, setName] = useState('');
+const [busy, setBusy] = useState(false);
+const [msg, setMsg] = useState('');
+async function submit() {
+if (!email.trim() || !password) { setMsg('メールアドレスとパスワードを入力してください'); return; }
+setBusy(true); setMsg('');
+try {
+if (mode === 'signup') {
+if (!name.trim()) { setMsg('表示名を入力してください'); setBusy(false); return; }
+const { error } = await sb.auth.signUp({ email: email.trim(), password, options: { data: { display_name: name.trim() } } });
+if (error) setMsg(error.message);
+else { setMsg('✉️ 確認メールを送信しました。メール内のリンクを開いた後、ログインしてください。'); setMode('signin'); }
+} else {
+const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
+if (error) setMsg(error.message);
+}
+} catch (e) { setMsg(e.message); }
+setBusy(false);
+}
+async function google() {
+const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+if (error) setMsg(error.message);
+}
+return (
+<div className="auth-wrap">
+<div className="auth-card">
+<div className="auth-logo">Run<span>Diary</span></div>
+<div className="auth-sub">チーム練習日誌<br/>ログインして自分の記録を残そう</div>
+{msg && <div className="auth-msg">{msg}</div>}
+{mode === 'signup' && (
+<div className="auth-field">
+<label>表示名（チームに表示される名前）</label>
+<input type="text" value={name} placeholder="例：佐藤 大地" onChange={e=>setName(e.target.value)} />
+</div>
+)}
+<div className="auth-field">
+<label>メールアドレス</label>
+<input type="email" value={email} placeholder="you@example.com" onChange={e=>setEmail(e.target.value)} />
+</div>
+<div className="auth-field">
+<label>パスワード（6文字以上）</label>
+<input type="password" value={password} placeholder="••••••••" onChange={e=>setPassword(e.target.value)} />
+</div>
+<button className="auth-btn" disabled={busy} onClick={submit}>
+{busy ? '処理中...' : (mode === 'signup' ? 'アカウントを作る' : 'ログイン')}
+</button>
+<div className="auth-divider">または</div>
+<button className="auth-google" onClick={google}>
+<svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.9z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.6H2v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.7 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2a11 11 0 0 0 0 9.8l3.7-2.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.1-3.1A11 11 0 0 0 2 7.1l3.7 2.8C6.6 7.3 9.1 5.4 12 5.4z"/></svg>
+Googleでログイン
+</button>
+<div className="auth-switch">
+{mode === 'signup'
+? <span>アカウントを持っている？ <button onClick={()=>{setMode('signin');setMsg('');}}>ログイン</button></span>
+: <span>アカウントがない？ <button onClick={()=>{setMode('signup');setMsg('');}}>新規登録</button></span>}
+</div>
+</div>
+</div>
+);
+}
+
+function AuthGate() {
+const [session, setSession] = useState(undefined);
+useEffect(() => {
+sb.auth.getSession().then(({ data }) => setSession(data.session));
+const { data: sub } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
+return () => { sub.subscription.unsubscribe(); };
+}, []);
+if (session === undefined) return <div className="empty-state">⏳ 読み込み中...</div>;
+if (!session) return <AuthScreen />;
+return <App session={session} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AuthGate />);
+</script>
+</body>
+</html>
