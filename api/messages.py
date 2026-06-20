@@ -14,7 +14,7 @@ GEMINI_ENDPOINT = (
 
 def call_gemini(text, max_tokens):
     if not API_KEY:
-        raise RuntimeError("GEMINI_API_KEY is empty (env not set for this environment)")
+        raise RuntimeError("GEMINI_API_KEY is empty")
     url = GEMINI_ENDPOINT.format(model=MODEL, key=API_KEY)
     payload = {
         "contents": [{"parts": [{"text": text}]}],
@@ -33,7 +33,7 @@ def call_gemini(text, max_tokens):
         body = json.loads(resp.read().decode("utf-8"))
     candidates = body.get("candidates") or []
     if not candidates:
-        raise RuntimeError("No candidates: " + json.dumps(body)[:300])
+        raise RuntimeError("No candidates")
     parts = candidates[0].get("content", {}).get("parts", [])
     return "".join(p.get("text", "") for p in parts).strip()
 
@@ -43,13 +43,6 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-
-    def _send(self, code, obj):
-        self.send_response(code)
-        self._cors()
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps(obj).encode("utf-8"))
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -69,12 +62,24 @@ class handler(BaseHTTPRequestHandler):
                     user_text += c if isinstance(c, str) else json.dumps(c)
             max_tokens = req_body.get("max_tokens", 1000)
             text_out = call_gemini(user_text, max_tokens)
-            self._send(200, {"content": [{"type": "text", "text": text_out}]})
+            resp_body = json.dumps(
+                {"content": [{"type": "text", "text": text_out}]}
+            ).encode("utf-8")
+            self.send_response(200)
+            self._cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(resp_body)
         except urllib.error.HTTPError as e:
-            detail = e.read().decode("utf-8", "ignore")[:500]
-            self._send(200, {"content": [{"type": "text", "text": f"[診断] Gemini HTTPError {e.code}: {detail}"}]})
+            # Geminiが返したエラー番号(429など)をそのまま返す
+            self.send_response(e.code)
+            self._cors()
+            self.end_headers()
         except Exception as e:
-            self._send(200, {"content": [{"type": "text", "text": f"[診断] {type(e).__name__}: {e}"}]})
+            print(f"Error: {e}")
+            self.send_response(500)
+            self._cors()
+            self.end_headers()
 
     def log_message(self, fmt, *args):
         print(fmt % args)
