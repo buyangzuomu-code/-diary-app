@@ -23,7 +23,7 @@ def call_gemini(text, max_tokens):
     }
     req = urllib.request.Request(
         url,
-        data=json.dumps(payload).encode("utf-8"),
+        data=json.dumps(payload).encode("utf-60"),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
